@@ -15,7 +15,7 @@
     </div>
     
     <x-card>
-        <form action="{{ route('positions.update', $position->pos_id) }}" method="POST">
+        <form action="{{ route('positions.update', $position['pos_id']) }}" method="POST">
             @csrf
             @method('PUT')
             
@@ -25,7 +25,7 @@
                         name="pos_code" 
                         label="Kode Jabatan" 
                         placeholder="Masukkan kode jabatan" 
-                        :value="old('pos_code', $position->pos_code)"
+                        :value="old('pos_code', $position['pos_code'])"
                         required
                         helper="Kode jabatan harus unik dan maksimal 10 karakter"
                     />
@@ -36,7 +36,7 @@
                         name="pos_name" 
                         label="Nama Jabatan" 
                         placeholder="Masukkan nama jabatan" 
-                        :value="old('pos_name', $position->pos_name)"
+                        :value="old('pos_name', $position['pos_name'])"
                         required
                         helper="Nama jabatan maksimal 100 karakter"
                     />
@@ -44,7 +44,7 @@
                 
                 <div>
                     <label class="flex items-center">
-                        <input type="checkbox" name="pos_is_active" value="1" {{ old('pos_is_active', $position->pos_is_active) == '1' ? 'checked' : '' }}
+                        <input type="checkbox" name="pos_is_active" value="1" {{ old('pos_is_active', $position['pos_is_active']) == '1' ? 'checked' : '' }}
                             class="w-4 h-4 text-accent border-gray-600 rounded focus:ring-accent focus:ring-opacity-50">
                         <span class="ml-2">Aktif</span>
                     </label>

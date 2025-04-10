@@ -16,26 +16,32 @@
     </div>
     
     <x-card>
+        @if(session('error'))
+            <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-700 dark:text-red-100">
+                {{ session('error') }}
+            </div>
+        @endif
+
         @if(count($users) > 0)
             <div class="overflow-x-auto">
                 <x-table :headers="['ID', 'Name', 'Email', 'Division', 'Position', 'Roles', 'Status']">
                     @foreach($users as $user)
                         <tr class="border-b dark:border-gray-700 hover:bg-gray-600">
-                            <td class="px-6 py-4">{{ $user->u_employee_id }}</td>
-                            <td class="px-6 py-4">{{ $user->u_name }}</td>
-                            <td class="px-6 py-4">{{ $user->u_email }}</td>
+                            <td class="px-6 py-4">{{ $user['u_employee_id'] }}</td>
+                            <td class="px-6 py-4">{{ $user['u_name'] }}</td>
+                            <td class="px-6 py-4">{{ $user['u_email'] }}</td>
                             <td class="px-6 py-4">
-                                {{ $user->division ? $user->division->div_name : '-' }}
+                                {{ $user['division'] ? $user['division']['div_name'] : '-' }}
                             </td>
                             <td class="px-6 py-4">
-                                {{ $user->position ? $user->position->pos_name : '-' }}
+                                {{ $user['position'] ? $user['position']['pos_name'] : '-' }}
                             </td>
                             <td class="px-6 py-4">
-                                @if($user->roles->count() > 0)
+                                @if(!empty($user['roles']))
                                     <div class="flex flex-wrap gap-1">
-                                        @foreach($user->roles as $role)
+                                        @foreach($user['roles'] as $role)
                                             <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-700 text-white">
-                                                {{ $role->role_name }}
+                                                {{ $role['role_name'] }}
                                             </span>
                                         @endforeach
                                     </div>
@@ -44,7 +50,7 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4">
-                                @if($user->u_is_active)
+                                @if($user['u_is_active'])
                                     <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-700 text-white">
                                         Active
                                     </span>
@@ -56,18 +62,18 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex space-x-2">
-                                    <a href="{{ route('users.show', $user->u_id) }}" class="text-blue-500 hover:text-blue-700">
+                                    <a href="{{ route('users.show', $user['u_id']) }}" class="text-blue-500 hover:text-blue-700">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                         </svg>
                                     </a>
-                                    <a href="{{ route('users.edit', $user->u_id) }}" class="text-yellow-500 hover:text-yellow-700">
+                                    <a href="{{ route('users.edit', $user['u_id']) }}" class="text-yellow-500 hover:text-yellow-700">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                         </svg>
                                     </a>
-                                    <form action="{{ route('users.destroy', $user->u_id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengguna ini?');">
+                                    <form action="{{ route('users.destroy', $user['u_id']) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengguna ini?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-red-500 hover:text-red-700">

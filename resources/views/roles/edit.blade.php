@@ -15,7 +15,7 @@
     </div>
     
     <x-card>
-        <form action="{{ route('roles.update', $role->role_id) }}" method="POST">
+        <form action="{{ route('roles.update', $role['role_id']) }}" method="POST">
             @csrf
             @method('PUT')
             
@@ -25,7 +25,7 @@
                         name="role_name" 
                         label="Nama Role" 
                         placeholder="Masukkan nama role" 
-                        :value="old('role_name', $role->role_name)"
+                        :value="old('role_name', $role['role_name'])"
                         required
                         helper="Nama role harus unik dan maksimal 50 karakter"
                     />
@@ -37,7 +37,7 @@
                         name="role_level" 
                         label="Level" 
                         placeholder="Masukkan level (angka)" 
-                        :value="old('role_level', $role->role_level)"
+                        :value="old('role_level', $role['role_level'])"
                         required
                         min="1"
                         max="100000"

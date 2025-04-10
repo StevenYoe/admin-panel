@@ -15,7 +15,7 @@
     </div>
     
     <x-card>
-        <form action="{{ route('users.update', $user->u_id) }}" method="POST">
+        <form action="{{ route('users.update', $user['u_id']) }}" method="POST">
             @csrf
             @method('PUT')
             
@@ -25,7 +25,7 @@
                         name="u_employee_id" 
                         label="Employee ID" 
                         placeholder="Masukkan Employee ID" 
-                        :value="old('u_employee_id', $user->u_employee_id)"
+                        :value="old('u_employee_id', $user['u_employee_id'])"
                         required
                         helper="Employee ID harus unik dan maksimal 20 karakter"
                     />
@@ -36,7 +36,7 @@
                         name="u_name" 
                         label="Username" 
                         placeholder="Masukkan username" 
-                        :value="old('u_name', $user->u_name)"
+                        :value="old('u_name', $user['u_name'])"
                         required
                         helper="Username harus unik dan maksimal 100 karakter"
                     />
@@ -48,7 +48,7 @@
                         name="u_email" 
                         label="Email" 
                         placeholder="Masukkan email" 
-                        :value="old('u_email', $user->u_email)"
+                        :value="old('u_email', $user['u_email'])"
                         required
                         helper="Email harus unik dan valid"
                     />
@@ -79,7 +79,7 @@
                         name="u_phone" 
                         label="Nomor Telepon" 
                         placeholder="Masukkan nomor telepon" 
-                        :value="old('u_phone', $user->u_phone)"
+                        :value="old('u_phone', $user['u_phone'])"
                         helper="Opsional, maksimal 20 karakter"
                     />
                 </div>
@@ -89,7 +89,7 @@
                         name="u_address" 
                         label="Alamat" 
                         placeholder="Masukkan alamat" 
-                        :value="old('u_address', $user->u_address)"
+                        :value="old('u_address', $user['u_address'])"
                         helper="Opsional"
                     />
                 </div>
@@ -99,7 +99,7 @@
                         type="date" 
                         name="u_birthdate" 
                         label="Tanggal Lahir" 
-                        :value="old('u_birthdate', $user->u_birthdate ? date('Y-m-d', strtotime($user->u_birthdate)) : '')"
+                        :value="old('u_birthdate', $user['u_birthdate'] ? date('Y-m-d', strtotime($user['u_birthdate'])) : '')"
                         helper="Opsional"
                     />
                 </div>
@@ -109,7 +109,7 @@
                         type="date" 
                         name="u_join_date" 
                         label="Tanggal Bergabung" 
-                        :value="old('u_join_date', $user->u_join_date ? date('Y-m-d', strtotime($user->u_join_date)) : '')"
+                        :value="old('u_join_date', $user['u_join_date'] ? date('Y-m-d', strtotime($user['u_join_date'])) : '')"
                         required
                     />
                 </div>
@@ -119,7 +119,7 @@
                         name="u_division_id" 
                         label="Divisi" 
                         :options="$divisions"
-                        :selected="old('u_division_id', $user->u_division_id)"
+                        :selected="old('u_division_id', $user['u_division_id'])"
                         placeholder="Pilih Divisi"
                     />
                 </div>
@@ -129,7 +129,7 @@
                         name="u_position_id" 
                         label="Jabatan" 
                         :options="$positions"
-                        :selected="old('u_position_id', $user->u_position_id)"
+                        :selected="old('u_position_id', $user['u_position_id'])"
                         placeholder="Pilih Jabatan"
                     />
                 </div>
@@ -138,12 +138,12 @@
                     <label class="block text-sm font-medium mb-2">Is Manager?</label>
                     <div class="flex items-center space-x-4">
                         <label class="inline-flex items-center">
-                            <input type="radio" name="u_is_manager" value="1" {{ old('u_is_manager', $user->u_is_manager) == '1' ? 'checked' : '' }}
+                            <input type="radio" name="u_is_manager" value="1" {{ old('u_is_manager', $user['u_is_manager']) == '1' ? 'checked' : '' }}
                                 class="w-4 h-4 text-accent border-gray-600 focus:ring-accent focus:ring-opacity-50">
                             <span class="ml-2">Yes</span>
                         </label>
                         <label class="inline-flex items-center">
-                            <input type="radio" name="u_is_manager" value="0" {{ old('u_is_manager', $user->u_is_manager) == '0' ? 'checked' : '' }}
+                            <input type="radio" name="u_is_manager" value="0" {{ old('u_is_manager', $user['u_is_manager']) == '0' ? 'checked' : '' }}
                                 class="w-4 h-4 text-accent border-gray-600 focus:ring-accent focus:ring-opacity-50">
                             <span class="ml-2">No</span>
                         </label>
@@ -154,12 +154,12 @@
                     <label class="block text-sm font-medium mb-2">Status</label>
                     <div class="flex items-center space-x-4">
                         <label class="inline-flex items-center">
-                            <input type="radio" name="u_is_active" value="1" {{ old('u_is_active', $user->u_is_active) == '1' ? 'checked' : '' }}
+                            <input type="radio" name="u_is_active" value="1" {{ old('u_is_active', $user['u_is_active']) == '1' ? 'checked' : '' }}
                                 class="w-4 h-4 text-accent border-gray-600 focus:ring-accent focus:ring-opacity-50">
                             <span class="ml-2">Active</span>
                         </label>
                         <label class="inline-flex items-center">
-                            <input type="radio" name="u_is_active" value="0" {{ old('u_is_active', $user->u_is_active) == '0' ? 'checked' : '' }}
+                            <input type="radio" name="u_is_active" value="0" {{ old('u_is_active', $user['u_is_active']) == '0' ? 'checked' : '' }}
                                 class="w-4 h-4 text-accent border-gray-600 focus:ring-accent focus:ring-opacity-50">
                             <span class="ml-2">Inactive</span>
                         </label>

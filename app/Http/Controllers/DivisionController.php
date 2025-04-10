@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Division;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
-class DivisionController extends Controller
+class DivisionController extends BaseController
 {
     /**
      * Display a listing of the resource.
@@ -15,8 +13,22 @@ class DivisionController extends Controller
      */
     public function index()
     {
-        $divisions = Division::all();
-        return view('divisions.index', compact('divisions'));
+        $response = $this->apiGet('/divisions');
+        
+        if (!isset($response['success']) || !$response['success']) {
+            return view('divisions.index')->with('error', $response['message'] ?? 'Gagal memuat data divisi');
+        }
+        
+        // Handle both paginated and non-paginated responses
+        if (isset($response['data']['data'])) {
+            $divisions = $response['data']['data'];
+            $pagination = $response['data'];
+        } else {
+            $divisions = $response['data'] ?? [];
+            $pagination = null;
+        }
+        
+        return view('divisions.index', compact('divisions', 'pagination'));
     }
 
     /**
@@ -38,7 +50,7 @@ class DivisionController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'div_code' => 'required|string|max:10|unique:login.divisions,div_code',
+            'div_code' => 'required|string|max:10',
             'div_name' => 'required|string|max:100',
             'div_is_active' => 'nullable|boolean',
         ]);
@@ -46,13 +58,14 @@ class DivisionController extends Controller
         // Handle checkbox boolean
         $validated['div_is_active'] = $request->has('div_is_active');
         
-        // Add created_by tracking
-        // $validated['div_created_by'] = auth()->user()->u_employee_id;
-        $validated['div_created_at'] = now();
-        $validated['div_updated_at'] = null;
+        // Kirim data ke API
+        $response = $this->apiPost('/divisions', $validated);
         
-        // Create division
-        Division::create($validated);
+        if (!isset($response['success']) || !$response['success']) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['message' => $response['message'] ?? 'Gagal menyimpan divisi']);
+        }
         
         return redirect()->route('divisions.index')
             ->with('success', 'Divisi berhasil ditambahkan.');
@@ -61,38 +74,50 @@ class DivisionController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Division  $division
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Division $division)
+    public function show($id)
     {
-        // Load associated users
-        $division->load('users');
-        return view('divisions.show', compact('division'));
+        $response = $this->apiGet("/divisions/{$id}");
+        
+        if (!isset($response['success']) || !$response['success']) {
+            return redirect()->route('divisions.index')
+                ->with('error', $response['message'] ?? 'Divisi tidak ditemukan');
+        }
+        
+        return view('divisions.show', ['division' => $response['data']]);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Division  $division
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Division $division)
+    public function edit($id)
     {
-        return view('divisions.edit', compact('division'));
+        $response = $this->apiGet("/divisions/{$id}");
+        
+        if (!isset($response['success']) || !$response['success']) {
+            return redirect()->route('divisions.index')
+                ->with('error', $response['message'] ?? 'Divisi tidak ditemukan');
+        }
+        
+        return view('divisions.edit', ['division' => $response['data']]);
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Division  $division
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Division $division)
+    public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'div_code' => ['required', 'string', 'max:10', Rule::unique('login.divisions', 'div_code')->ignore($division->div_id, 'div_id')],
+            'div_code' => 'required|string|max:10',
             'div_name' => 'required|string|max:100',
             'div_is_active' => 'nullable|boolean',
         ]);
@@ -100,13 +125,14 @@ class DivisionController extends Controller
         // Handle checkbox boolean
         $validated['div_is_active'] = $request->has('div_is_active');
         
-        // Add updated_by tracking
-        // $validated['div_updated_by'] = auth()->user()->u_employee_id;
-        $validated['div_updated_at'] = now();
-        unset($validated['div_created_at']);
+        // Kirim data ke API
+        $response = $this->apiPut("/divisions/{$id}", $validated);
         
-        // Update division
-        $division->update($validated);
+        if (!isset($response['success']) || !$response['success']) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['message' => $response['message'] ?? 'Gagal memperbarui divisi']);
+        }
         
         return redirect()->route('divisions.index')
             ->with('success', 'Divisi berhasil diperbarui.');
@@ -115,19 +141,17 @@ class DivisionController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Division  $division
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Division $division)
+    public function destroy($id)
     {
-        // Check if there are users associated with this division
-        if ($division->users()->count() > 0) {
-            return redirect()->route('divisions.index')
-                ->with('error', 'Divisi tidak dapat dihapus karena masih memiliki pengguna terkait.');
-        }
+        $response = $this->apiDelete("/divisions/{$id}");
         
-        // Delete division
-        $division->delete();
+        if (!isset($response['success']) || !$response['success']) {
+            return redirect()->route('divisions.index')
+                ->with('error', $response['message'] ?? 'Divisi tidak dapat dihapus');
+        }
         
         return redirect()->route('divisions.index')
             ->with('success', 'Divisi berhasil dihapus.');

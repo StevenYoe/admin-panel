@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Position;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
-class PositionController extends Controller
+class PositionController extends BaseController
 {
     /**
      * Display a listing of the resource.
@@ -15,8 +13,22 @@ class PositionController extends Controller
      */
     public function index()
     {
-        $positions = Position::all();
-        return view('positions.index', compact('positions'));
+        $response = $this->apiGet('/positions');
+        
+        if (!isset($response['success']) || !$response['success']) {
+            return view('positions.index')->with('error', $response['message'] ?? 'Gagal memuat data jabatan');
+        }
+        
+        // Handle both paginated and non-paginated responses
+        if (isset($response['data']['data'])) {
+            $positions = $response['data']['data'];
+            $pagination = $response['data'];
+        } else {
+            $positions = $response['data'] ?? [];
+            $pagination = null;
+        }
+        
+        return view('positions.index', compact('positions', 'pagination'));
     }
 
     /**
@@ -38,7 +50,7 @@ class PositionController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'pos_code' => 'required|string|max:10|unique:login.positions,pos_code',
+            'pos_code' => 'required|string|max:10',
             'pos_name' => 'required|string|max:100',
             'pos_is_active' => 'nullable|boolean',
         ]);
@@ -46,13 +58,14 @@ class PositionController extends Controller
         // Handle checkbox boolean
         $validated['pos_is_active'] = $request->has('pos_is_active');
         
-        // Add created_by tracking
-        // $validated['pos_created_by'] = auth()->user()->u_employee_id;
-        $validated['pos_created_at'] = now();
-        $validated['pos_updated_at'] = null;
+        // Kirim data ke API
+        $response = $this->apiPost('/positions', $validated);
         
-        // Create position
-        Position::create($validated);
+        if (!isset($response['success']) || !$response['success']) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['message' => $response['message'] ?? 'Gagal menyimpan jabatan']);
+        }
         
         return redirect()->route('positions.index')
             ->with('success', 'Jabatan berhasil ditambahkan.');
@@ -61,38 +74,50 @@ class PositionController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Position  $position
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Position $position)
+    public function show($id)
     {
-        // Load associated users
-        $position->load('users');
-        return view('positions.show', compact('position'));
+        $response = $this->apiGet("/positions/{$id}");
+        
+        if (!isset($response['success']) || !$response['success']) {
+            return redirect()->route('positions.index')
+                ->with('error', $response['message'] ?? 'Jabatan tidak ditemukan');
+        }
+        
+        return view('positions.show', ['position' => $response['data']]);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Position  $position
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Position $position)
+    public function edit($id)
     {
-        return view('positions.edit', compact('position'));
+        $response = $this->apiGet("/positions/{$id}");
+        
+        if (!isset($response['success']) || !$response['success']) {
+            return redirect()->route('positions.index')
+                ->with('error', $response['message'] ?? 'Jabatan tidak ditemukan');
+        }
+        
+        return view('positions.edit', ['position' => $response['data']]);
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Position  $position
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Position $position)
+    public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'pos_code' => ['required', 'string', 'max:10', Rule::unique('login.positions', 'pos_code')->ignore($position->pos_id, 'pos_id')],
+            'pos_code' => 'required|string|max:10',
             'pos_name' => 'required|string|max:100',
             'pos_is_active' => 'nullable|boolean',
         ]);
@@ -100,13 +125,14 @@ class PositionController extends Controller
         // Handle checkbox boolean
         $validated['pos_is_active'] = $request->has('pos_is_active');
         
-        // Add updated_by tracking
-        // $validated['pos_updated_by'] = auth()->user()->u_employee_id;
-        $validated['pos_updated_at'] = now();
-        unset($validated['pos_created_at']);
+        // Kirim data ke API
+        $response = $this->apiPut("/positions/{$id}", $validated);
         
-        // Update position
-        $position->update($validated);
+        if (!isset($response['success']) || !$response['success']) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['message' => $response['message'] ?? 'Gagal memperbarui jabatan']);
+        }
         
         return redirect()->route('positions.index')
             ->with('success', 'Jabatan berhasil diperbarui.');
@@ -115,19 +141,17 @@ class PositionController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Position  $position
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Position $position)
+    public function destroy($id)
     {
-        // Check if there are users associated with this position
-        if ($position->users()->count() > 0) {
-            return redirect()->route('positions.index')
-                ->with('error', 'Jabatan tidak dapat dihapus karena masih memiliki pengguna terkait.');
-        }
+        $response = $this->apiDelete("/positions/{$id}");
         
-        // Delete position
-        $position->delete();
+        if (!isset($response['success']) || !$response['success']) {
+            return redirect()->route('positions.index')
+                ->with('error', $response['message'] ?? 'Jabatan tidak dapat dihapus');
+        }
         
         return redirect()->route('positions.index')
             ->with('success', 'Jabatan berhasil dihapus.');

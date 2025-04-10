@@ -3,70 +3,41 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\Role;
-use App\Models\Division;
-use App\Models\Position;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
-class DashboardController extends Controller
+class DashboardController extends BaseController
 {
     public function index()
-    {
-        // Get basic counts
-        $userCount = User::count();
-        $roleCount = Role::count();
-        $divisionCount = Division::count();
-        $positionCount = Position::count();
-        
-        // Count active users
-        $activeUserCount = User::where('u_is_active', true)->count();
-        
-        // Count new users this month
-        $now = Carbon::now();
-        $startOfMonth = $now->startOfMonth();
-        $newUsersThisMonth = User::where('u_created_at', '>=', $startOfMonth)->count();
-        
-        // Get users per division with percentages
-        $usersPerDivision = Division::select(
-            'div_id',
-            'div_name',
-            DB::raw('COUNT(u.u_id) as user_count'),
-            DB::raw('CASE WHEN (SELECT COUNT(*) FROM login.users) > 0 
-                     THEN (COUNT(u.u_id) * 100.0 / (SELECT COUNT(*) FROM login.users)) 
-                     ELSE 0 END as percentage')
-        )
-        ->leftJoin('login.users as u', 'login.divisions.div_id', '=', 'u.u_division_id')
-        ->where('div_is_active', true)
-        ->groupBy('div_id', 'div_name')
-        ->orderByDesc('user_count')
-        ->get();
-        
-        // Get users per position with percentages
-        $usersPerPosition = Position::select(
-            'pos_id',
-            'pos_name',
-            DB::raw('COUNT(u.u_id) as user_count'),
-            DB::raw('CASE WHEN (SELECT COUNT(*) FROM login.users) > 0 
-                     THEN (COUNT(u.u_id) * 100.0 / (SELECT COUNT(*) FROM login.users)) 
-                     ELSE 0 END as percentage')
-        )
-        ->leftJoin('login.users as u', 'login.positions.pos_id', '=', 'u.u_position_id')
-        ->where('pos_is_active', true)
-        ->groupBy('pos_id', 'pos_name')
-        ->orderByDesc('user_count')
-        ->get();
-            
-        return view('dashboard', compact(
-            'userCount',
-            'roleCount',
-            'divisionCount',
-            'positionCount',
-            'activeUserCount',
-            'newUsersThisMonth',
-            'usersPerDivision',
-            'usersPerPosition'
-        ));
+{
+    // Change from '/dashboard' to '/dashboard/statistics'
+    $response = $this->apiGet('/dashboard/statistics');
+    
+    // Cek apakah response berhasil
+    if (!isset($response['success']) || !$response['success']) {
+        return view('dashboard')->with('error', $response['message'] ?? 'Gagal memuat data dashboard');
     }
+    
+    // Ekstrak data dari response untuk view
+    $data = [
+        'userCount' => $response['data']['total_users'] ?? 0,
+        'activeUserCount' => $response['data']['active_users'] ?? 0,
+        'divisionCount' => $response['data']['total_divisions'] ?? 0,
+        'positionCount' => $response['data']['total_positions'] ?? 0,
+        'roleCount' => $response['data']['total_roles'] ?? 0,
+        'newUsersThisMonth' => count($response['data']['recent_users'] ?? []),
+        'usersPerDivision' => collect($response['data']['users_by_division'] ?? [])->map(function($item) {
+            return (object) [
+                'div_name' => $item['name'] ?? 'Unknown',
+                'user_count' => $item['count'] ?? 0
+            ];
+        }),
+        'usersPerPosition' => collect($response['data']['users_by_position'] ?? [])->map(function($item) {
+            return (object) [
+                'pos_name' => $item['name'] ?? 'Unknown',
+                'user_count' => $item['count'] ?? 0
+            ];
+        })
+    ];
+    
+    return view('dashboard', $data);
+}
 }

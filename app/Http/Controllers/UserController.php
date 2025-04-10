@@ -2,198 +2,234 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\Role;
-use App\Models\Division;
-use App\Models\Position;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Session;
 
-class UserController extends Controller
+class UserController extends BaseController
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\View\View
      */
     public function index()
     {
-        $users = User::with(['roles', 'division', 'position'])->get();
-        return view('users.index', compact('users'));
+        $response = $this->apiGet('/users');
+        
+        // Check if the response is valid and has data
+        if (!isset($response['success']) || !$response['success']) {
+            return view('users.index')->with('error', $response['message'] ?? 'Failed to fetch users');
+        }
+        
+        // Extract data properly from the response
+        $users = $response['data']['data'] ?? []; // Note: Pagination structure has a 'data' key
+        $pagination = $response['data'] ?? [];
+        
+        return view('users.index', compact('users', 'pagination'));
     }
 
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\View\View
      */
     public function create()
     {
-        $roles = Role::pluck('role_name', 'role_id');
-        $divisions = Division::where('div_is_active', true)->pluck('div_name', 'div_id');
-        $positions = Position::where('pos_is_active', true)->pluck('pos_name', 'pos_id');
-        $managers = User::where('u_is_manager', true)->where('u_is_active', true)->pluck('u_name', 'u_id');
+        // Get divisions for dropdown
+        $divisionsResponse = $this->apiGet('/divisions/all'); // Use 'all' endpoint for simpler list
+        $divisionsData = $divisionsResponse['data'] ?? [];
         
-        return view('users.create', compact('roles', 'divisions', 'positions', 'managers'));
+        // Transform to ID => Name format
+        $divisions = [];
+        if (is_array($divisionsData)) {
+            foreach ($divisionsData as $division) {
+                if (isset($division['div_id']) && isset($division['div_name'])) {
+                    $divisions[$division['div_id']] = $division['div_name'];
+                }
+            }
+        }
+        
+        // Get positions for dropdown
+        $positionsResponse = $this->apiGet('/positions/all'); // Use 'all' endpoint
+        $positionsData = $positionsResponse['data'] ?? [];
+        $positions = [];
+        if (is_array($positionsData)) {
+            foreach ($positionsData as $position) {
+                if (isset($position['pos_id']) && isset($position['pos_name'])) {
+                    $positions[$position['pos_id']] = $position['pos_name'];
+                }
+            }
+        }
+        
+        // Get roles for dropdown
+        $rolesResponse = $this->apiGet('/roles/all'); // Use 'all' endpoint
+        $rolesData = $rolesResponse['data'] ?? [];
+        $roles = [];
+        if (is_array($rolesData)) {
+            foreach ($rolesData as $role) {
+                if (isset($role['role_id']) && isset($role['role_name'])) {
+                    $roles[$role['role_id']] = $role['role_name'];
+                }
+            }
+        }
+        
+        // Get user roles if in edit mode
+        $userRoles = [];
+        
+        return view('users.create', compact('divisions', 'positions', 'roles', 'userRoles'));
     }
 
     /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'u_employee_id' => 'required|string|max:20|unique:login.users,u_employee_id',
-            'u_name' => 'required|string|max:100|unique:login.users,u_name',
-            'u_email' => 'required|email|max:100|unique:login.users,u_email',
-            'u_password' => 'required|string|min:8|confirmed',
-            'u_phone' => 'nullable|string|max:20',
-            'u_address' => 'nullable|string',
-            'u_birthdate' => 'nullable|date',
-            'u_join_date' => 'required|date',
-            'u_division_id' => 'nullable|exists:login.divisions,div_id',
-            'u_position_id' => 'nullable|exists:login.positions,pos_id',
-            'u_is_manager' => 'nullable|boolean',
-            'u_manager_id' => 'nullable|exists:login.users,u_id',
-            'u_is_active' => 'nullable|boolean',
-            'roles' => 'nullable|array',
-            'roles.*' => 'exists:login.roles,role_id'
-        ]);
-        
-        // Handle checkbox booleans
-        $validated['u_is_manager'] = $request->has('u_is_manager') ? 1 : 0;
-        $validated['u_is_active'] = $request->has('u_is_active') ? 1 : 0;
-        
-        // Hash password
-        $validated['u_password'] = Hash::make($validated['u_password']);
-        
-        // Set only created_at, leave updated_at as null
-        $validated['u_created_at'] = now();
-        $validated['u_updated_at'] = null;
-        // No u_updated_at when creating
-        
-        // Create user
-        $user = User::create($validated);
-        
-        // Assign roles
-        if (isset($validated['roles'])) {
-            $user->roles()->attach($validated['roles']);
+        try {
+            $response = $this->apiPost('/users', $request->all());
+            
+            if (!isset($response['success']) || !$response['success']) {
+                return back()
+                    ->withInput()
+                    ->withErrors($response['errors'] ?? [])
+                    ->with('error', $response['message'] ?? 'Failed to create user');
+            }
+            
+            return redirect()->route('users.index')
+                ->with('success', $response['message'] ?? 'User created successfully');
+        } catch (\Exception $e) {
+            \Log::error('Exception in user creation: ' . $e->getMessage());
+            return back()
+                ->withInput()
+                ->with('error', 'An error occurred while creating the user. Please try again.');
         }
-        
-        return redirect()->route('users.index')
-            ->with('success', 'Pengguna berhasil ditambahkan.');
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Http\Response
+     * @param  int  $id
+     * @return \Illuminate\View\View
      */
-    public function show(User $user)
+    public function show($id)
     {
-        $user->load(['roles', 'division', 'position', 'manager']);
+        $response = $this->apiGet("/users/{$id}");
+        
+        if (!isset($response['success']) || !$response['success']) {
+            return redirect()->route('users.index')
+                ->with('error', $response['message'] ?? 'User not found');
+        }
+        
+        $user = $response['data'];
+        
         return view('users.show', compact('user'));
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Http\Response
+     * @param  int  $id
+     * @return \Illuminate\View\View
      */
-    public function edit(User $user)
+    public function edit($id)
     {
-        $roles = Role::pluck('role_name', 'role_id');
-        $divisions = Division::where('div_is_active', true)->pluck('div_name', 'div_id');
-        $positions = Position::where('pos_is_active', true)->pluck('pos_name', 'pos_id');
-        $managers = User::where('u_is_manager', true)
-                        ->where('u_is_active', true)
-                        ->where('u_id', '!=', $user->u_id) // Exclude self
-                        ->pluck('u_name', 'u_id');
+        // Get user
+        $userResponse = $this->apiGet("/users/{$id}");
         
-        $userRoles = $user->roles->pluck('role_id')->toArray();
+        if (!isset($userResponse['success']) || !$userResponse['success']) {
+            return redirect()->route('users.index')
+                ->with('error', $userResponse['message'] ?? 'User not found');
+        }
         
-        return view('users.edit', compact('user', 'roles', 'divisions', 'positions', 'managers', 'userRoles'));
+        $user = $userResponse['data'];
+        
+        // Get user roles
+        $userRoles = [];
+        if (isset($user['roles']) && is_array($user['roles'])) {
+            foreach ($user['roles'] as $role) {
+                if (isset($role['role_id'])) {
+                    $userRoles[] = $role['role_id'];
+                }
+            }
+        }
+        
+        // Get divisions for dropdown
+        $divisionsResponse = $this->apiGet('/divisions/all');
+        $divisionsData = $divisionsResponse['data'] ?? [];
+        $divisions = [];
+        if (is_array($divisionsData)) {
+            foreach ($divisionsData as $division) {
+                if (isset($division['div_id']) && isset($division['div_name'])) {
+                    $divisions[$division['div_id']] = $division['div_name'];
+                }
+            }
+        }
+        
+        // Get positions for dropdown
+        $positionsResponse = $this->apiGet('/positions/all');
+        $positionsData = $positionsResponse['data'] ?? [];
+        $positions = [];
+        if (is_array($positionsData)) {
+            foreach ($positionsData as $position) {
+                if (isset($position['pos_id']) && isset($position['pos_name'])) {
+                    $positions[$position['pos_id']] = $position['pos_name'];
+                }
+            }
+        }
+        
+        // Get roles for dropdown
+        $rolesResponse = $this->apiGet('/roles/all');
+        $rolesData = $rolesResponse['data'] ?? [];
+        $roles = [];
+        if (is_array($rolesData)) {
+            foreach ($rolesData as $role) {
+                if (isset($role['role_id']) && isset($role['role_name'])) {
+                    $roles[$role['role_id']] = $role['role_name'];
+                }
+            }
+        }
+        
+        return view('users.edit', compact('user', 'divisions', 'positions', 'roles', 'userRoles'));
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Http\Response
+     * @param  int  $id
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'u_employee_id' => ['required', 'string', 'max:20', Rule::unique('login.users', 'u_employee_id')->ignore($user->u_id, 'u_id')],
-            'u_name' => ['required', 'string', 'max:100', Rule::unique('login.users', 'u_name')->ignore($user->u_id, 'u_id')],
-            'u_email' => ['required', 'email', 'max:100', Rule::unique('login.users', 'u_email')->ignore($user->u_id, 'u_id')],
-            'u_password' => 'nullable|string|min:8|confirmed',
-            'u_phone' => 'nullable|string|max:20',
-            'u_address' => 'nullable|string',
-            'u_birthdate' => 'nullable|date',
-            'u_join_date' => 'required|date',
-            'u_division_id' => 'nullable|exists:login.divisions,div_id',
-            'u_position_id' => 'nullable|exists:login.positions,pos_id',
-            'u_is_manager' => 'nullable|boolean',
-            'u_manager_id' => 'nullable|exists:login.users,u_id',
-            'u_is_active' => 'nullable|boolean',
-            'roles' => 'nullable|array',
-            'roles.*' => 'exists:login.roles,role_id'
-        ]);
+        $response = $this->apiPut("/users/{$id}", $request->all());
         
-        // Handle checkbox booleans
-        $validated['u_is_manager'] = $request->has('u_is_manager') ? 1 : 0;
-        $validated['u_is_active'] = $request->has('u_is_active') ? 1 : 0;
-        
-        // Update password if provided
-        if (isset($validated['u_password'])) {
-            $validated['u_password'] = Hash::make($validated['u_password']);
-        } else {
-            unset($validated['u_password']);
+        if (!isset($response['success']) || !$response['success']) {
+            return back()
+                ->withInput()
+                ->withErrors(['message' => $response['message'] ?? 'Failed to update user']);
         }
         
-        // Set only updated_at when updating
-        $validated['u_updated_at'] = now();
-        
-        // Remove created_at from the data being updated to preserve the original value
-        unset($validated['u_created_at']);
-        
-        // Update user
-        $user->update($validated);
-        
-        // Sync roles
-        if (isset($validated['roles'])) {
-            $user->roles()->sync($validated['roles']);
-        } else {
-            $user->roles()->detach();
-        }
-        
-        return redirect()->route('users.index')
-            ->with('success', 'Pengguna berhasil diperbarui.');
+        return redirect()->route('users.show', $id)
+            ->with('success', $response['message'] ?? 'User updated successfully');
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Http\Response
+     * @param  int  $id
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(User $user)
+    public function destroy($id)
     {
-        // Detach all roles first
-        $user->roles()->detach();
+        $response = $this->apiDelete("/users/{$id}");
         
-        // Delete user
-        $user->delete();
+        if (!isset($response['success']) || !$response['success']) {
+            return back()->with('error', $response['message'] ?? 'Failed to delete user');
+        }
         
         return redirect()->route('users.index')
-            ->with('success', 'Pengguna berhasil dihapus.');
+            ->with('success', $response['message'] ?? 'User deleted successfully');
     }
 }

@@ -15,7 +15,7 @@
     </div>
     
     <x-card>
-        <form action="{{ route('divisions.update', $division->div_id) }}" method="POST">
+        <form action="{{ route('divisions.update', $division['div_id']) }}" method="POST">
             @csrf
             @method('PUT')
             
@@ -25,7 +25,7 @@
                         name="div_code" 
                         label="Kode Divisi" 
                         placeholder="Masukkan kode divisi" 
-                        :value="old('div_code', $division->div_code)"
+                        :value="old('div_code', $division['div_code'])"
                         required
                         helper="Kode divisi harus unik dan maksimal 10 karakter"
                     />
@@ -36,7 +36,7 @@
                         name="div_name" 
                         label="Nama Divisi" 
                         placeholder="Masukkan nama divisi" 
-                        :value="old('div_name', $division->div_name)"
+                        :value="old('div_name', $division['div_name'])"
                         required
                         helper="Nama divisi maksimal 100 karakter"
                     />
@@ -44,7 +44,7 @@
                 
                 <div>
                     <label class="flex items-center">
-                        <input type="checkbox" name="div_is_active" value="1" {{ old('div_is_active', $division->div_is_active) == '1' ? 'checked' : '' }}
+                        <input type="checkbox" name="div_is_active" value="1" {{ old('div_is_active', $division['div_is_active']) == '1' ? 'checked' : '' }}
                             class="w-4 h-4 text-accent border-gray-600 rounded focus:ring-accent focus:ring-opacity-50">
                         <span class="ml-2">Aktif</span>
                     </label>
