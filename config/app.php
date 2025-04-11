@@ -14,6 +14,7 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
+    'storage_url' => env('STORAGE_URL', 'http://localhost:8001/storage'),
 
     /*
     |--------------------------------------------------------------------------

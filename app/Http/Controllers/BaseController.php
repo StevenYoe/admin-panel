@@ -142,10 +142,19 @@ class BaseController extends Controller
                 
                 // Add form fields to multipart
                 foreach ($formData as $key => $value) {
-                    $requestOptions['multipart'][] = [
-                        'name' => $key,
-                        'contents' => $value
-                    ];
+                    if (is_array($value)) {
+                        foreach ($value as $item) {
+                            $requestOptions['multipart'][] = [
+                                'name' => $key . '[]', // Tambahkan [] untuk array
+                                'contents' => $item
+                            ];
+                        }
+                    } else {
+                        $requestOptions['multipart'][] = [
+                            'name' => $key,
+                            'contents' => $value
+                        ];
+                    }
                 }
                 
                 // Add files to multipart
