@@ -27,16 +27,16 @@
                 <x-table :headers="['ID', 'Name', 'Email', 'Division', 'Position', 'Roles', 'Status']">
                     @foreach($users as $user)
                         <tr class="border-b dark:border-gray-700 hover:bg-gray-600">
-                            <td class="px-6 py-4">{{ $user['u_employee_id'] }}</td>
-                            <td class="px-6 py-4">{{ $user['u_name'] }}</td>
-                            <td class="px-6 py-4">{{ $user['u_email'] }}</td>
-                            <td class="px-6 py-4">
+                            <td class="px-5 py-4 text-center">{{ $user['u_employee_id'] }}</td>
+                            <td class="px-5 py-4 text-center">{{ $user['u_name'] }}</td>
+                            <td class="px-5 py-4 text-center">{{ $user['u_email'] }}</td>
+                            <td class="px-5 py-4 text-center">
                                 {{ $user['division'] ? $user['division']['div_name'] : '-' }}
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-5 py-4 text-center">
                                 {{ $user['position'] ? $user['position']['pos_name'] : '-' }}
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-5 py-4 text-center">
                                 @if(!empty($user['roles']))
                                     <div class="flex flex-wrap gap-1">
                                         @foreach($user['roles'] as $role)
@@ -49,7 +49,7 @@
                                     <span class="text-gray-400">-</span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-5 py-4 text-center">
                                 @if($user['u_is_active'])
                                     <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-700 text-white">
                                         Active
@@ -60,8 +60,8 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4">
-                                <div class="flex space-x-2">
+                            <td class="px-5 py-4 text-center">
+                                <div class="flex justify-center space-x-2">
                                     <a href="{{ route('users.show', $user['u_id']) }}" class="text-blue-500 hover:text-blue-700">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>

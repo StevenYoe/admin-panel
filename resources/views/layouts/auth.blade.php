@@ -6,6 +6,8 @@
     <title>@yield('title', 'Pazar Admin')</title>
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Konfigurasi Tailwind untuk tema
         tailwind.config = {
@@ -24,5 +26,15 @@
 </head>
 <body class="dark bg-bg-dark text-gray-custom min-h-screen">
     @yield('content')
+    <script>
+        @if(session('swal_msg'))
+            Swal.fire({
+                icon: '{{ session('swal_type', 'info') }}',
+                title: '{{ session('swal_title', 'Notification') }}',
+                text: '{{ session('swal_msg') }}',
+                timer: {{ session('swal_timer', 3000) }}
+            });
+        @endif
+    </script>
 </body>
 </html>

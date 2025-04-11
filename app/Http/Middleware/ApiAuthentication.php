@@ -19,6 +19,9 @@ class ApiAuthentication
     {
         // Cek jika tidak ada token
         if (!Session::has('auth_token')) {
+            Session::flash('swal_type', 'warning');
+            Session::flash('swal_title', 'Authentication Required');
+            Session::flash('swal_msg', 'Please login to access this page.');
             return redirect()->route('login');
         }
 

@@ -46,5 +46,5 @@ Route::middleware([\App\Http\Middleware\ApiAuthentication::class])->group(functi
     Route::resource('positions', PositionController::class);
     
     // Profile
-    //Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
 });

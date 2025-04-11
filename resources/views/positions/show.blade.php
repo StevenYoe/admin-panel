@@ -13,7 +13,7 @@
             Kembali ke Daftar
         </x-button>
         
-        <div class="flex space-x-2">
+        <div class="flex justify-center space-x-2">
             <x-button href="{{ route('positions.edit', $position['pos_id']) }}" variant="primary">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -79,14 +79,14 @@
                     <x-table :headers="['ID', 'Nama', 'Email', 'Divisi']">
                         @foreach($position['users'] as $user)
                             <tr class="border-b dark:border-gray-700 hover:bg-gray-600">
-                                <td class="px-6 py-4">{{ $user['u_employee_id'] }}</td>
-                                <td class="px-6 py-4">{{ $user['u_name'] }}</td>
-                                <td class="px-6 py-4">{{ $user['u_email'] }}</td>
-                                <td class="px-6 py-4">
+                                <td class="px-5 py-4 text-center">{{ $user['u_employee_id'] }}</td>
+                                <td class="px-5 py-4 text-center">{{ $user['u_name'] }}</td>
+                                <td class="px-5 py-4 text-center">{{ $user['u_email'] }}</td>
+                                <td class="px-5 py-4 text-center">
                                     {{ $user['division'] ? $user['division']['div_name'] : '-' }}
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex space-x-2">
+                                <td class="px-5 py-4 text-center">
+                                    <div class="flex justify-center space-x-2">
                                         <a href="{{ route('users.show', $user['u_id']) }}" class="text-blue-500 hover:text-blue-700">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>

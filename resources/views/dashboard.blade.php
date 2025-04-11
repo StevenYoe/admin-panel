@@ -117,12 +117,12 @@
                     <tbody>
                         @forelse($usersPerDivision ?? [] as $division)
                         <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                            <td class="px-6 py-4 text-center">{{ $division->div_name }}</td>
-                            <td class="px-6 py-4 text-center">{{ $division->user_count }}</td>
+                            <td class="px-5 py-4 text-center">{{ $division->div_name }}</td>
+                            <td class="px-5 py-4 text-center">{{ $division->user_count }}</td>
                         </tr>
                         @empty
                         <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                            <td colspan="2" class="px-6 py-4 text-center">No data available</td>
+                            <td colspan="2" class="px-5 py-4 text-center">No data available</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -144,12 +144,12 @@
                     <tbody>
                         @forelse($usersPerPosition ?? [] as $position)
                         <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                            <td class="px-6 py-4 text-center">{{ $position->pos_name }}</td>
-                            <td class="px-6 py-4 text-center">{{ $position->user_count }}</td>
+                            <td class="px-5 py-4 text-center">{{ $position->pos_name }}</td>
+                            <td class="px-5 py-4 text-center">{{ $position->user_count }}</td>
                         </tr>
                         @empty
                         <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                            <td colspan="2" class="px-6 py-4 text-center">No data available</td>
+                            <td colspan="2" class="px-5 py-4 text-center">No data available</td>
                         </tr>
                         @endforelse
                     </tbody>

@@ -21,10 +21,10 @@
                 <x-table :headers="['ID', 'Kode', 'Nama', 'Status']">
                     @foreach($divisions as $division)
                         <tr class="border-b dark:border-gray-700 hover:bg-gray-600">
-                            <td class="px-6 py-4">{{ $division['div_id'] }}</td>
-                            <td class="px-6 py-4">{{ $division['div_code'] }}</td>
-                            <td class="px-6 py-4">{{ $division['div_name'] }}</td>
-                            <td class="px-6 py-4">
+                            <td class="px-5 py-4 text-center">{{ $division['div_id'] }}</td>
+                            <td class="px-5 py-4 text-center">{{ $division['div_code'] }}</td>
+                            <td class="px-5 py-4 text-center">{{ $division['div_name'] }}</td>
+                            <td class="px-5 py-4 text-center">
                                 @if($division['div_is_active'])
                                     <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-700 text-white">
                                         Active
@@ -35,8 +35,8 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4">
-                                <div class="flex space-x-2">
+                            <td class="px-5 py-4 text-center">
+                                <div class="flex justify-center space-x-2">
                                     <a href="{{ route('divisions.show', $division['div_id']) }}" class="text-blue-500 hover:text-blue-700">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
