@@ -15,7 +15,7 @@
     </div>
     
     <x-card>
-        <form action="{{ route('users.store') }}" method="POST">
+        <form enctype="multipart/form-data" action="{{ route('users.store') }}" method="POST">
             @csrf
             
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -153,6 +153,25 @@
                 
                 <!-- Hidden field to always set u_is_active as true for new users -->
                 <input type="hidden" name="u_is_active" value="1">
+
+                <div class="mb-4">
+                    <label for="u_profile_image" class="block text-sm font-medium mb-2">Profile Image</label>
+                    <input type="file" name="u_profile_image" id="u_profile_image" accept="image/*"
+                        class="block w-full text-sm text-gray-400 border border-gray-600 rounded-md 
+                        file:mr-4 file:py-2 file:px-4 file:rounded-md
+                        file:border-0 file:text-sm file:font-medium
+                        file:bg-accent file:text-white
+                        hover:file:bg-accent-dark">
+                    <p class="mt-1 text-xs text-gray-400">Upload JPG, PNG, or GIF (max 2MB)</p>
+                    
+                    @if(isset($user) && $user['u_profile_image'])
+                        <div class="mt-2">
+                            <p class="text-xs text-gray-400 mb-1">Current image:</p>
+                            <img src="{{ config('app.api_base_url') . '/storage/' . $user['u_profile_image'] }}" 
+                                alt="Profile Image" class="h-20 w-20 object-cover rounded-full">
+                        </div>
+                    @endif
+                </div>
                 
                 <div class="md:col-span-2">
                     <h4 class="text-sm font-medium mb-2">Role</h4>

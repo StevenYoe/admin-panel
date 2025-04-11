@@ -81,21 +81,110 @@ class BaseController extends Controller
     protected function apiRequest($method, $endpoint, $data = [])
     {
         try {
-            $request = Http::withToken(Session::get('auth_token') ?? '');
+            // Token untuk autentikasi
+            $token = Session::get('auth_token') ?? '';
             
-            // Log request details
+            // Cek apakah ada file yang diupload
+            $hasFiles = false;
+            foreach ($data as $value) {
+                if ($value instanceof \Illuminate\Http\UploadedFile) {
+                    $hasFiles = true;
+                    break;
+                }
+            }
+            
+            // Log request untuk debugging
             \Log::info("API Request: {$method} {$endpoint}", [
                 'data' => $data,
-                'has_token' => !empty(Session::get('auth_token'))
+                'has_token' => !empty($token),
+                'has_files' => $hasFiles
             ]);
             
-            $response = $request->{$method}($this->baseUrl . $endpoint, $data);
+            // Handle file uploads berbeda dari request biasa
+            if ($hasFiles) {
+                // Create a new request instance with token
+                $options = [
+                    'headers' => [
+                        'Authorization' => 'Bearer ' . $token,
+                        'Accept' => 'application/json'
+                    ]
+                ];
+                
+                // Prepare multipart form data
+                $formData = [];
+                
+                // Add regular form fields
+                foreach ($data as $key => $value) {
+                    if (!($value instanceof \Illuminate\Http\UploadedFile)) {
+                        $formData[$key] = $value;
+                    }
+                }
+                
+                // For PUT requests, convert to POST with _method=PUT
+                if (strtolower($method) === 'put') {
+                    $actualMethod = 'post';
+                    $formData['_method'] = 'PUT';
+                } else {
+                    $actualMethod = strtolower($method);
+                }
+                
+                // Create a GuzzleHttp client for more control
+                $client = new \GuzzleHttp\Client();
+                
+                // Prepare the request
+                $requestOptions = [
+                    'headers' => [
+                        'Authorization' => 'Bearer ' . $token,
+                        'Accept' => 'application/json'
+                    ],
+                    'multipart' => [],
+                ];
+                
+                // Add form fields to multipart
+                foreach ($formData as $key => $value) {
+                    $requestOptions['multipart'][] = [
+                        'name' => $key,
+                        'contents' => $value
+                    ];
+                }
+                
+                // Add files to multipart
+                foreach ($data as $key => $value) {
+                    if ($value instanceof \Illuminate\Http\UploadedFile) {
+                        $requestOptions['multipart'][] = [
+                            'name' => $key,
+                            'contents' => fopen($value->getRealPath(), 'r'),
+                            'filename' => $value->getClientOriginalName()
+                        ];
+                    }
+                }
+                
+                // Send the request
+                $guzzleResponse = $client->request(
+                    strtoupper($actualMethod), 
+                    $this->baseUrl . $endpoint, 
+                    $requestOptions
+                );
+                
+                // Convert to Laravel response for consistency
+                $response = new \Illuminate\Http\Client\Response(
+                    new \GuzzleHttp\Psr7\Response(
+                        $guzzleResponse->getStatusCode(),
+                        $guzzleResponse->getHeaders(),
+                        (string) $guzzleResponse->getBody()
+                    )
+                );
+            } else {
+                // Regular request tanpa file
+                $response = Http::withToken($token)
+                    ->acceptJson()
+                    ->{$method}($this->baseUrl . $endpoint, $data);
+            }
             
-            // Log raw response for debugging
+            // Log response untuk debugging
             \Log::info("API Raw Response from {$endpoint}:", [
                 'status' => $response->status(),
-                'body' => $response->body(),
-                'headers' => $response->headers()
+                'body' => $response->body()
             ]);
             
             // Jika status 401 (Unauthorized), redirect ke login
@@ -105,7 +194,7 @@ class BaseController extends Controller
                 return;
             }
             
-            // Check if the response is valid JSON
+            // Periksa response JSON
             $responseData = $response->json();
             
             if ($responseData === null) {
@@ -118,7 +207,7 @@ class BaseController extends Controller
             
             return $responseData;
         } catch (\Exception $e) {
-            // Log error with trace
+            // Log error dengan trace
             \Log::error("API Request Error: {$method} {$endpoint}", [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()

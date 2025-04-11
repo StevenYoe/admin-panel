@@ -88,7 +88,14 @@ class UserController extends BaseController
     public function store(Request $request)
     {
         try {
-            $response = $this->apiPost('/users', $request->all());
+            $data = $request->all();
+            
+            // Handle file upload for API request
+            if ($request->hasFile('u_profile_image')) {
+                $data['u_profile_image'] = $request->file('u_profile_image');
+            }
+            
+            $response = $this->apiPost('/users', $data);
             
             if (!isset($response['success']) || !$response['success']) {
                 return back()
@@ -203,16 +210,31 @@ class UserController extends BaseController
      */
     public function update(Request $request, $id)
     {
-        $response = $this->apiPut("/users/{$id}", $request->all());
-        
-        if (!isset($response['success']) || !$response['success']) {
+        try {
+            $data = $request->all();
+            
+            // Handle file upload for API request
+            if ($request->hasFile('u_profile_image')) {
+                $data['u_profile_image'] = $request->file('u_profile_image');
+            }
+            
+            $response = $this->apiPut("/users/{$id}", $data);
+            
+            if (!isset($response['success']) || !$response['success']) {
+                return back()
+                    ->withInput()
+                    ->withErrors($response['errors'] ?? [])
+                    ->with('error', $response['message'] ?? 'Failed to update user');
+            }
+            
+            return redirect()->route('users.show', $id)
+                ->with('success', $response['message'] ?? 'User updated successfully');
+        } catch (\Exception $e) {
+            \Log::error('Exception in user update: ' . $e->getMessage());
             return back()
                 ->withInput()
-                ->withErrors(['message' => $response['message'] ?? 'Failed to update user']);
+                ->with('error', 'An error occurred while updating the user. Please try again.');
         }
-        
-        return redirect()->route('users.show', $id)
-            ->with('success', $response['message'] ?? 'User updated successfully');
     }
 
     /**
