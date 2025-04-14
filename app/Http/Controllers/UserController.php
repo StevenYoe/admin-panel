@@ -257,6 +257,16 @@ class UserController extends BaseController
                     ->withErrors($response['errors'] ?? [])
                     ->with('error', $response['message'] ?? 'Failed to update user');
             }
+        
+            // Periksa jika user yang diupdate adalah user yang sedang login
+            // Jika ya, perbarui data di session
+            if (session('user') && session('user')['u_id'] == $id) {
+                // Ambil data user yang sudah diupdate untuk disimpan di session
+                $userResponse = $this->apiGet("/users/{$id}");
+                if (isset($userResponse['success']) && $userResponse['success']) {
+                    session(['user' => $userResponse['data']]);
+                }
+            }
             
             return redirect()->route('users.show', $id)
                 ->with('success', $response['message'] ?? 'User updated successfully');

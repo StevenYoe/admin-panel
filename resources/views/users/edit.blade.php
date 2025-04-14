@@ -176,10 +176,10 @@
                         hover:file:bg-accent-dark">
                     <p class="mt-1 text-xs text-gray-400">Upload JPG, PNG, or GIF (max 2MB)</p>
                     
-                    @if(isset($user) && $user['u_profile_image'])
+                    @if($user && $user['u_profile_image'])
                         <div class="mt-2">
                             <p class="text-xs text-gray-400 mb-1">Current image:</p>
-                            <img src="{{ config('app.api_base_url') . '/storage/' . $user['u_profile_image'] }}" 
+                            <img src="{{ config('app.storage_url') . '/' . $user['u_profile_image'] }}"
                                 alt="Profile Image" class="h-20 w-20 object-cover rounded-full">
                         </div>
                     @endif
