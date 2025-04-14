@@ -135,7 +135,7 @@
     <!-- Sidebar -->
     <div class="flex pt-2">
         <aside 
-            :class="sidebarOpen ? 'translate-x-0 w-64' : 'w-0 -translate-x-full'"
+            :class="sidebarOpen ? 'translate-x-0 w-48' : 'w-0 -translate-x-full'"
             class="fixed z-20 inset-y-0 left-0 mt-16 transition-all duration-300 transform h-full bg-bg-dark border-r border-gray-700 overflow-hidden">
             
             <nav class="p-4 space-y-2 overflow-y-auto h-full">
@@ -191,7 +191,7 @@
 
         <!-- Content -->
         <main 
-            :class="sidebarOpen ? 'ml-64' : 'ml-0'"
+            :class="sidebarOpen ? 'ml-48' : 'ml-0'"
             class="flex-1 min-h-screen p-6 pt-20 transition-all duration-300">
             <div class="mb-6">
                 <h1 class="text-2xl font-bold">@yield('page-title', 'Dashboard')</h1>

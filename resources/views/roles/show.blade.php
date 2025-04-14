@@ -51,6 +51,21 @@
                     <h4 class="text-sm font-medium text-gray-400">Level</h4>
                     <p>{{ $role['role_level'] }}</p>
                 </div>
+
+                <div>
+                    <h4 class="text-sm font-medium text-gray-400">Status</h4>
+                    <p>
+                        @if($role['role_is_active'])
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-700 text-white">
+                                Active
+                            </span>
+                        @else
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-700 text-white">
+                                Inactive
+                            </span>
+                        @endif
+                    </p>
+                </div>
             </div>
         </x-card>
         

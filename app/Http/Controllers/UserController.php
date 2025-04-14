@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class UserController extends BaseController
 {
@@ -12,21 +13,51 @@ class UserController extends BaseController
      *
      * @return \Illuminate\View\View
      */
-    public function index()
-    {
-        $response = $this->apiGet('/users');
-        
-        // Check if the response is valid and has data
-        if (!isset($response['success']) || !$response['success']) {
-            return view('users.index')->with('error', $response['message'] ?? 'Failed to fetch users');
-        }
-        
-        // Extract data properly from the response
-        $users = $response['data']['data'] ?? []; // Note: Pagination structure has a 'data' key
-        $pagination = $response['data'] ?? [];
-        
-        return view('users.index', compact('users', 'pagination'));
+    public function index(Request $request)
+{
+    $params = [
+        'sort_by' => $request->input('sort_by', 'u_id'),
+        'sort_order' => $request->input('sort_order', 'asc'),
+        'per_page' => $request->input('per_page', 10)
+    ];
+
+    $response = $this->apiGet('/users', $params);
+    
+    // Check if the response is valid and has data
+    if (!isset($response['success']) || !$response['success']) {
+        return view('users.index')->with('error', $response['message'] ?? 'Failed to fetch users');
     }
+    
+    $users = $response['data']['data'] ?? [];
+    
+    // Create a proper paginator instance if we have the necessary pagination data
+    $paginator = null;
+    if (isset($response['data'])) {
+        $paginationData = $response['data'];
+        if (isset($paginationData['current_page']) && isset($paginationData['per_page']) && isset($paginationData['total'])) {
+            $paginator = new LengthAwarePaginator(
+                $users,
+                $paginationData['total'],
+                $paginationData['per_page'],
+                $paginationData['current_page'],
+                [
+                    'path' => request()->url(),
+                    'query' => $request->query()
+                ]
+            );
+        }
+    }
+
+    $sortBy = $params['sort_by'];
+    $sortOrder = $params['sort_order'];
+    
+    // Check if this is an AJAX request
+    if ($request->ajax() || $request->has('ajax')) {
+        return view('users.table-content', compact('users', 'paginator', 'sortBy', 'sortOrder'))->render();
+    }
+    
+    return view('users.index', compact('users', 'paginator', 'sortBy', 'sortOrder'));
+}
 
     /**
      * Show the form for creating a new resource.

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class DivisionController extends BaseController
 {
@@ -11,24 +12,46 @@ class DivisionController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $response = $this->apiGet('/divisions');
+        $params = [
+            'sort_by' => $request->input('sort_by', 'div_id'),
+            'sort_order' => $request->input('sort_order', 'asc'),
+            'per_page' => $request->input('per_page', 10)
+        ];
+
+        $response = $this->apiGet('/divisions', $params);
         
         if (!isset($response['success']) || !$response['success']) {
             return view('divisions.index')->with('error', $response['message'] ?? 'Gagal memuat data divisi');
         }
         
-        // Handle both paginated and non-paginated responses
-        if (isset($response['data']['data'])) {
-            $divisions = $response['data']['data'];
-            $pagination = $response['data'];
-        } else {
-            $divisions = $response['data'] ?? [];
-            $pagination = null;
-        }
+        $divisions = $response['data']['data'] ?? [];
         
-        return view('divisions.index', compact('divisions', 'pagination'));
+    
+    // Create a proper paginator instance if we have the necessary pagination data
+    $paginator = null;
+    if (isset($response['data'])) {
+        $paginationData = $response['data'];
+        if (isset($paginationData['current_page']) && isset($paginationData['per_page']) && isset($paginationData['total'])) {
+            $paginator = new LengthAwarePaginator(
+                $divisions,
+                $paginationData['total'],
+                $paginationData['per_page'],
+                $paginationData['current_page'],
+                [
+                    'path' => request()->url(),
+                    'query' => request()->query()
+                ]
+            );
+        }
+    }
+    
+        // Make sure these variable names match what your view is expecting
+        $sortBy = $params['sort_by'];
+        $sortOrder = $params['sort_order'];
+
+        return view('divisions.index', compact('divisions', 'paginator', 'params', 'sortBy', 'sortOrder'));
     }
 
     /**

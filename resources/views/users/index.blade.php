@@ -24,9 +24,23 @@
 
         @if(count($users) > 0)
             <div class="overflow-x-auto">
-                <x-table :headers="['ID', 'Name', 'Email', 'Division', 'Position', 'Roles', 'Status']">
+                <x-table 
+                    :headers="[
+                        ['name' => 'ID', 'key' => 'u_id'],
+                        ['name' => 'Employee ID', 'key' => 'u_employee_id'],
+                        ['name' => 'Name', 'key' => 'u_name'],
+                        ['name' => 'Email', 'key' => 'u_email'],
+                        ['name' => 'Division', 'key' => 'division.div_name'],
+                        ['name' => 'Position', 'key' => 'position.pos_name'],
+                        ['name' => 'Roles', 'key' => 'roles'],
+                        ['name' => 'Status', 'key' => 'u_is_active']
+                    ]"
+                    :sortBy="$sortBy"
+                    :sortOrder="$sortOrder"
+                >
                     @foreach($users as $user)
                         <tr class="border-b dark:border-gray-700 hover:bg-gray-600">
+                            <td class="px-5 py-4 text-center">{{ $user['u_id'] }}</td>
                             <td class="px-5 py-4 text-center">{{ $user['u_employee_id'] }}</td>
                             <td class="px-5 py-4 text-center">{{ $user['u_name'] }}</td>
                             <td class="px-5 py-4 text-center">{{ $user['u_email'] }}</td>
@@ -38,7 +52,7 @@
                             </td>
                             <td class="px-5 py-4 text-center">
                                 @if(!empty($user['roles']))
-                                    <div class="flex flex-wrap gap-1">
+                                    <div class="flex justify-center flex-wrap gap-1">
                                         @foreach($user['roles'] as $role)
                                             <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-700 text-white">
                                                 {{ $role['role_name'] }}
@@ -88,7 +102,12 @@
                     @endforeach
                 </x-table>
             </div>
-        @else
+            @if(isset($paginator))
+                <div class="mt-4">
+                    {{ $paginator->links() }}
+                </div>
+            @endif
+            @else
             <div class="py-8 text-center">
                 <p class="text-gray-400">Belum ada pengguna yang ditambahkan</p>
                 <x-button href="{{ route('users.create') }}" variant="primary" class="mt-4">

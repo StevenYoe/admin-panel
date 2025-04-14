@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class RoleController extends BaseController
 {
@@ -11,24 +12,50 @@ class RoleController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $response = $this->apiGet('/roles');
+        $params = [
+            'sort_by' => $request->input('sort_by', 'role_id'),
+            'sort_order' => $request->input('sort_order', 'asc'),
+            'per_page' => $request->input('per_page', 10)
+        ];
+    
+        $response = $this->apiGet('/roles', $params);
         
         if (!isset($response['success']) || !$response['success']) {
             return view('roles.index')->with('error', $response['message'] ?? 'Gagal memuat data role');
         }
         
-        // Handle both paginated and non-paginated responses
-        if (isset($response['data']['data'])) {
-            $roles = $response['data']['data'];
-            $pagination = $response['data'];
-        } else {
-            $roles = $response['data'] ?? [];
-            $pagination = null;
-        }
+        $roles = $response['data']['data'] ?? [];
         
-        return view('roles.index', compact('roles', 'pagination'));
+        // Create a proper paginator instance if we have the necessary pagination data
+        $paginator = null;
+        if (isset($response['data'])) {
+            $paginationData = $response['data'];
+            if (isset($paginationData['current_page']) && isset($paginationData['per_page']) && isset($paginationData['total'])) {
+                $paginator = new LengthAwarePaginator(
+                    $roles,
+                    $paginationData['total'],
+                    $paginationData['per_page'],
+                    $paginationData['current_page'],
+                    [
+                        'path' => request()->url(),
+                        'query' => request()->query()
+                    ]
+                );
+            }
+        }
+
+        // Add these variables to be consistent with your view
+        $sortBy = $params['sort_by'];
+        $sortOrder = $params['sort_order'];
+
+        // If this is an AJAX request, return only the table content
+        if ($request->ajax()) {
+            return view('roles.partials.roles-table', compact('roles', 'paginator', 'params', 'sortBy', 'sortOrder'));
+        }
+
+        return view('roles.index', compact('roles', 'paginator', 'params', 'sortBy', 'sortOrder'));
     }
 
     /**
@@ -51,7 +78,7 @@ class RoleController extends BaseController
     {
         $validated = $request->validate([
             'role_name' => 'required|string|max:50',
-            'role_level' => 'required|integer|min:1|max:100000',
+            'role_level' => 'required|integer|min:0|max:100000',
             'role_is_active' => 'nullable|boolean'
         ]);
         
@@ -118,7 +145,7 @@ class RoleController extends BaseController
     {
         $validated = $request->validate([
             'role_name' => 'required|string|max:50',
-            'role_level' => 'required|integer|min:1|max:100000',
+            'role_level' => 'required|integer|min:0|max:100000',
             'role_is_active' => 'nullable|boolean'
         ]);
         

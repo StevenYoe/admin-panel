@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class PositionController extends BaseController
 {
@@ -11,24 +12,46 @@ class PositionController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $response = $this->apiGet('/positions');
+        $params = [
+            'sort_by' => $request->input('sort_by', 'pos_id'),
+            'sort_order' => $request->input('sort_order', 'asc'),
+            'per_page' => $request->input('per_page', 10)
+        ];
+
+        $response = $this->apiGet('/positions', $params);
         
         if (!isset($response['success']) || !$response['success']) {
             return view('positions.index')->with('error', $response['message'] ?? 'Gagal memuat data jabatan');
         }
         
-        // Handle both paginated and non-paginated responses
-        if (isset($response['data']['data'])) {
-            $positions = $response['data']['data'];
-            $pagination = $response['data'];
-        } else {
-            $positions = $response['data'] ?? [];
-            $pagination = null;
-        }
+        $positions = $response['data']['data'] ?? [];
         
-        return view('positions.index', compact('positions', 'pagination'));
+    
+    // Create a proper paginator instance if we have the necessary pagination data
+    $paginator = null;
+    if (isset($response['data'])) {
+        $paginationData = $response['data'];
+        if (isset($paginationData['current_page']) && isset($paginationData['per_page']) && isset($paginationData['total'])) {
+            $paginator = new LengthAwarePaginator(
+                $positions,
+                $paginationData['total'],
+                $paginationData['per_page'],
+                $paginationData['current_page'],
+                [
+                    'path' => request()->url(),
+                    'query' => request()->query()
+                ]
+            );
+        }
+    }
+    
+        // Make sure these variable names match what your view is expecting
+        $sortBy = $params['sort_by'];
+        $sortOrder = $params['sort_order'];
+
+        return view('positions.index', compact('positions', 'paginator', 'params', 'sortBy', 'sortOrder'));
     }
 
     /**
