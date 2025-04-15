@@ -36,17 +36,40 @@ class AuthController extends BaseController
             'email' => 'required|email',
             'password' => 'required',
         ]);
-
+    
         // Call API to authenticate
         $response = $this->apiPost('/login', $credentials);
         
+        \Log::info('Login API Response:', ['response' => $response]);
+        
         if (!isset($response['success']) || !$response['success']) {
-            return back()
-                ->withInput($request->only('email'))
-                ->withErrors(['message' => $response['message'] ?? 'Invalid credentials']);
+            $errorTitle = 'Login Failed';
+            $errorMsg = 'An error occurred while trying to log in. Please try again.';
+            
+            if (isset($response['message'])) {
+                $message = $response['message'];
+                
+                if ($message === 'User does not exist or is not active') {
+                    $errorTitle = 'Email Not Found';
+                    $errorMsg = 'The email you entered is not registered in our system.';
+                } 
+                else if ($message === 'Invalid credentials') {
+                    $errorTitle = 'Wrong Password';
+                    $errorMsg = 'The password you entered is incorrect. Please try again.';
+                }
+                else {
+                    $errorMsg = $message;
+                }
+            }
+            
+            Session::flash('swal_type', 'error');
+            Session::flash('swal_title', $errorTitle);
+            Session::flash('swal_msg', $errorMsg);
+            
+            return back()->withInput($request->only('email'));
         }
 
-        // Store token and user data in session
+        // Success path remains the same
         Session::put('auth_token', $response['data']['token']);
         Session::put('user', $response['data']['user']);
         Session::put('roles', $response['data']['roles'] ?? []);

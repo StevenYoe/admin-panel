@@ -196,8 +196,8 @@ class BaseController extends Controller
                 'body' => $response->body()
             ]);
             
-            // Jika status 401 (Unauthorized), redirect ke login
-            if ($response->status() === 401) {
+            // Modify this part - don't redirect for /login endpoint
+            if ($response->status() === 401 && $endpoint !== '/login') {
                 Session::forget(['auth_token', 'user', 'roles']);
                 redirect()->route('login')->send();
                 return;
