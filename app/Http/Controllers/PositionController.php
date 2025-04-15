@@ -50,8 +50,9 @@ class PositionController extends BaseController
         // Make sure these variable names match what your view is expecting
         $sortBy = $params['sort_by'];
         $sortOrder = $params['sort_order'];
+        $isSuperAdmin = $this->isSuperAdmin();
 
-        return view('positions.index', compact('positions', 'paginator', 'params', 'sortBy', 'sortOrder'));
+        return view('positions.index', compact('positions', 'paginator', 'sortBy', 'sortOrder', 'isSuperAdmin'));
     }
 
     /**
@@ -61,6 +62,12 @@ class PositionController extends BaseController
      */
     public function create()
     {
+        // Check if user has superadmin access
+        $redirect = $this->checkSuperAdminAccess('positions.index');
+        if ($redirect !== true) {
+            return $redirect;
+        }
+        
         return view('positions.create');
     }
 
@@ -72,6 +79,12 @@ class PositionController extends BaseController
      */
     public function store(Request $request)
     {
+        // Check if user has superadmin access
+        $redirect = $this->checkSuperAdminAccess('positions.index');
+        if ($redirect !== true) {
+            return $redirect;
+        }
+        
         $validated = $request->validate([
             'pos_code' => 'required|string|max:10',
             'pos_name' => 'required|string|max:100',
@@ -109,7 +122,13 @@ class PositionController extends BaseController
                 ->with('error', $response['message'] ?? 'Jabatan tidak ditemukan');
         }
         
-        return view('positions.show', ['position' => $response['data']]);
+        // Pass the superadmin status to view for conditionally showing edit/delete buttons
+        $isSuperAdmin = $this->isSuperAdmin();
+        
+        return view('positions.show', [
+            'position' => $response['data'],
+            'isSuperAdmin' => $isSuperAdmin
+        ]);
     }
 
     /**
@@ -120,6 +139,12 @@ class PositionController extends BaseController
      */
     public function edit($id)
     {
+        // Check if user has superadmin access
+        $redirect = $this->checkSuperAdminAccess('positions.index');
+        if ($redirect !== true) {
+            return $redirect;
+        }
+        
         $response = $this->apiGet("/positions/{$id}");
         
         if (!isset($response['success']) || !$response['success']) {
@@ -139,6 +164,12 @@ class PositionController extends BaseController
      */
     public function update(Request $request, $id)
     {
+        // Check if user has superadmin access
+        $redirect = $this->checkSuperAdminAccess('positions.index');
+        if ($redirect !== true) {
+            return $redirect;
+        }
+        
         $validated = $request->validate([
             'pos_code' => 'required|string|max:10',
             'pos_name' => 'required|string|max:100',
@@ -169,6 +200,12 @@ class PositionController extends BaseController
      */
     public function destroy($id)
     {
+        // Check if user has superadmin access
+        $redirect = $this->checkSuperAdminAccess('positions.index');
+        if ($redirect !== true) {
+            return $redirect;
+        }
+        
         $response = $this->apiDelete("/positions/{$id}");
         
         if (!isset($response['success']) || !$response['success']) {

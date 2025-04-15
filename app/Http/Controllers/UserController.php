@@ -50,13 +50,14 @@ class UserController extends BaseController
 
     $sortBy = $params['sort_by'];
     $sortOrder = $params['sort_order'];
+    $isSuperAdmin = $this->isSuperAdmin();
     
     // Check if this is an AJAX request
     if ($request->ajax() || $request->has('ajax')) {
-        return view('users.table-content', compact('users', 'paginator', 'sortBy', 'sortOrder'))->render();
+        return view('users.table-content', compact('users', 'paginator', 'sortBy', 'sortOrder', 'isSuperAdmin'))->render();
     }
     
-    return view('users.index', compact('users', 'paginator', 'sortBy', 'sortOrder'));
+    return view('users.index', compact('users', 'paginator', 'sortBy', 'sortOrder', 'isSuperAdmin'));
 }
 
     /**
@@ -66,6 +67,12 @@ class UserController extends BaseController
      */
     public function create()
     {
+        // Check if user has superadmin access
+        $redirect = $this->checkSuperAdminAccess('users.index');
+        if ($redirect !== true) {
+            return $redirect;
+        }
+        
         // Get divisions for dropdown
         $divisionsResponse = $this->apiGet('/divisions/all'); // Use 'all' endpoint for simpler list
         $divisionsData = $divisionsResponse['data'] ?? [];
@@ -118,6 +125,11 @@ class UserController extends BaseController
      */
     public function store(Request $request)
     {
+        $redirect = $this->checkSuperAdminAccess('users.index');
+        if ($redirect !== true) {
+            return $redirect;
+        }
+        
         try {
             $data = $request->all();
             
@@ -162,7 +174,10 @@ class UserController extends BaseController
         
         $user = $response['data'];
         
-        return view('users.show', compact('user'));
+        // Pass the superadmin status to view for conditionally showing edit/delete buttons
+        $isSuperAdmin = $this->isSuperAdmin();
+        
+        return view('users.show', compact('user', 'isSuperAdmin'));
     }
 
     /**
@@ -173,6 +188,12 @@ class UserController extends BaseController
      */
     public function edit($id)
     {
+        // Check if user has superadmin access
+        $redirect = $this->checkSuperAdminAccess('users.index');
+        if ($redirect !== true) {
+            return $redirect;
+        }
+        
         // Get user
         $userResponse = $this->apiGet("/users/{$id}");
         
@@ -241,6 +262,12 @@ class UserController extends BaseController
      */
     public function update(Request $request, $id)
     {
+        // Check if user has superadmin access
+        $redirect = $this->checkSuperAdminAccess('users.index');
+        if ($redirect !== true) {
+            return $redirect;
+        }
+        
         try {
             $data = $request->all();
             
@@ -286,6 +313,12 @@ class UserController extends BaseController
      */
     public function destroy($id)
     {
+        // Check if user has superadmin access
+        $redirect = $this->checkSuperAdminAccess('users.index');
+        if ($redirect !== true) {
+            return $redirect;
+        }
+        
         $response = $this->apiDelete("/users/{$id}");
         
         if (!isset($response['success']) || !$response['success']) {

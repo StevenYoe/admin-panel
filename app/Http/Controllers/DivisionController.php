@@ -50,8 +50,9 @@ class DivisionController extends BaseController
         // Make sure these variable names match what your view is expecting
         $sortBy = $params['sort_by'];
         $sortOrder = $params['sort_order'];
+        $isSuperAdmin = $this->isSuperAdmin();
 
-        return view('divisions.index', compact('divisions', 'paginator', 'params', 'sortBy', 'sortOrder'));
+        return view('divisions.index', compact('divisions', 'paginator', 'sortBy', 'sortOrder', 'isSuperAdmin'));
     }
 
     /**
@@ -61,6 +62,12 @@ class DivisionController extends BaseController
      */
     public function create()
     {
+        // Check if user has superadmin access
+        $redirect = $this->checkSuperAdminAccess('divisions.index');
+        if ($redirect !== true) {
+            return $redirect;
+        }
+        
         return view('divisions.create');
     }
 
@@ -72,6 +79,12 @@ class DivisionController extends BaseController
      */
     public function store(Request $request)
     {
+        // Check if user has superadmin access
+        $redirect = $this->checkSuperAdminAccess('divisions.index');
+        if ($redirect !== true) {
+            return $redirect;
+        }
+        
         $validated = $request->validate([
             'div_code' => 'required|string|max:10',
             'div_name' => 'required|string|max:100',
@@ -109,7 +122,13 @@ class DivisionController extends BaseController
                 ->with('error', $response['message'] ?? 'Divisi tidak ditemukan');
         }
         
-        return view('divisions.show', ['division' => $response['data']]);
+        // Pass the superadmin status to view for conditionally showing edit/delete buttons
+        $isSuperAdmin = $this->isSuperAdmin();
+        
+        return view('divisions.show', [
+            'division' => $response['data'],
+            'isSuperAdmin' => $isSuperAdmin
+        ]);
     }
 
     /**
@@ -120,6 +139,12 @@ class DivisionController extends BaseController
      */
     public function edit($id)
     {
+        // Check if user has superadmin access
+        $redirect = $this->checkSuperAdminAccess('divisions.index');
+        if ($redirect !== true) {
+            return $redirect;
+        }
+        
         $response = $this->apiGet("/divisions/{$id}");
         
         if (!isset($response['success']) || !$response['success']) {
@@ -139,6 +164,12 @@ class DivisionController extends BaseController
      */
     public function update(Request $request, $id)
     {
+        // Check if user has superadmin access
+        $redirect = $this->checkSuperAdminAccess('divisions.index');
+        if ($redirect !== true) {
+            return $redirect;
+        }
+        
         $validated = $request->validate([
             'div_code' => 'required|string|max:10',
             'div_name' => 'required|string|max:100',
@@ -169,6 +200,12 @@ class DivisionController extends BaseController
      */
     public function destroy($id)
     {
+        // Check if user has superadmin access
+        $redirect = $this->checkSuperAdminAccess('divisions.index');
+        if ($redirect !== true) {
+            return $redirect;
+        }
+        
         $response = $this->apiDelete("/divisions/{$id}");
         
         if (!isset($response['success']) || !$response['success']) {

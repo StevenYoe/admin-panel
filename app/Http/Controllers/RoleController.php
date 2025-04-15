@@ -49,13 +49,14 @@ class RoleController extends BaseController
         // Add these variables to be consistent with your view
         $sortBy = $params['sort_by'];
         $sortOrder = $params['sort_order'];
+        $isSuperAdmin = $this->isSuperAdmin();
 
         // If this is an AJAX request, return only the table content
         if ($request->ajax()) {
-            return view('roles.partials.roles-table', compact('roles', 'paginator', 'params', 'sortBy', 'sortOrder'));
+            return view('roles.table-content', compact('roles', 'paginator', 'sortBy', 'sortOrder', 'isSuperAdmin'))->render();
         }
 
-        return view('roles.index', compact('roles', 'paginator', 'params', 'sortBy', 'sortOrder'));
+        return view('roles.index', compact('roles', 'paginator', 'sortBy', 'sortOrder', 'isSuperAdmin'));
     }
 
     /**
@@ -65,6 +66,12 @@ class RoleController extends BaseController
      */
     public function create()
     {
+        // Check if user has superadmin access
+        $redirect = $this->checkSuperAdminAccess('roles.index');
+        if ($redirect !== true) {
+            return $redirect;
+        }
+        
         return view('roles.create');
     }
 
@@ -76,6 +83,12 @@ class RoleController extends BaseController
      */
     public function store(Request $request)
     {
+        // Check if user has superadmin access
+        $redirect = $this->checkSuperAdminAccess('roles.index');
+        if ($redirect !== true) {
+            return $redirect;
+        }
+        
         $validated = $request->validate([
             'role_name' => 'required|string|max:50',
             'role_level' => 'required|integer|min:0|max:100000',
@@ -113,7 +126,10 @@ class RoleController extends BaseController
                 ->with('error', $response['message'] ?? 'Role tidak ditemukan');
         }
         
-        return view('roles.show', ['role' => $response['data']]);
+        // Pass the superadmin status to view for conditionally showing edit/delete buttons
+        $isSuperAdmin = $this->isSuperAdmin();
+        
+        return view('roles.show',  ['role' => $response['data']], compact('isSuperAdmin'));
     }
 
     /**
@@ -124,6 +140,12 @@ class RoleController extends BaseController
      */
     public function edit($id)
     {
+        // Check if user has superadmin access
+        $redirect = $this->checkSuperAdminAccess('roles.index');
+        if ($redirect !== true) {
+            return $redirect;
+        }
+        
         $response = $this->apiGet("/roles/{$id}");
         
         if (!isset($response['success']) || !$response['success']) {
@@ -143,6 +165,12 @@ class RoleController extends BaseController
      */
     public function update(Request $request, $id)
     {
+        // Check if user has superadmin access
+        $redirect = $this->checkSuperAdminAccess('roles.index');
+        if ($redirect !== true) {
+            return $redirect;
+        }
+        
         $validated = $request->validate([
             'role_name' => 'required|string|max:50',
             'role_level' => 'required|integer|min:0|max:100000',
@@ -173,6 +201,12 @@ class RoleController extends BaseController
      */
     public function destroy($id)
     {
+        // Check if user has superadmin access
+        $redirect = $this->checkSuperAdminAccess('roles.index');
+        if ($redirect !== true) {
+            return $redirect;
+        }
+        
         $response = $this->apiDelete("/roles/{$id}");
         
         if (!isset($response['success']) || !$response['success']) {

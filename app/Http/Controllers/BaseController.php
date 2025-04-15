@@ -24,6 +24,58 @@ class BaseController extends Controller
     }
 
     /**
+     * Check if the current user is a superadmin
+     * 
+     * @return bool
+     */
+    protected function isSuperAdmin()
+    {
+        $roles = Session::get('roles', []);
+        
+        // Check if 'superadmin' is in the roles array
+        // This depends on how your roles are stored in the session
+        // It could be an array of role names or an array of role objects
+        
+        // For array of strings
+        if (in_array('superadmin', $roles)) {
+            return true;
+        }
+        
+        // For array of objects with 'role_name' property
+        foreach ($roles as $role) {
+            if (is_array($role) && isset($role['role_name']) && strtolower($role['role_name']) === 'superadmin') {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * Check if the current user has permission to perform CRUD operations
+     * Redirects to index with error message if not authorized
+     * 
+     * @param string $route Route to redirect to if not authorized
+     * @return bool True if authorized, otherwise redirects
+     */
+    protected function checkSuperAdminAccess($route = null)
+    {
+        if (!$this->isSuperAdmin()) {
+            Session::flash('swal_type', 'error');
+            Session::flash('swal_title', 'Access Denied');
+            Session::flash('swal_msg', 'You do not have permission to perform this action. Only superadmins can modify data.');
+            
+            if ($route) {
+                return Redirect::route($route);
+            }
+            
+            return false;
+        }
+        
+        return true;
+    }
+
+    /**
      * Melakukan GET request ke API
      *
      * @param string $endpoint
