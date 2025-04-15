@@ -1,7 +1,7 @@
 <!-- index.blade.php -->
 @extends('layouts.app')
 
-@section('title', 'Pengguna - Pazar Admin')
+@section('title', 'Pengguna - Pazar User Admin')
 
 @section('page-title', 'Pengguna')
 

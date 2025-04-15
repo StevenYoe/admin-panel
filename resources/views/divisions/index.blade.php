@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Divisi - Pazar Admin')
+@section('title', 'Divisi - Pazar User Admin')
 
 @section('page-title', 'Divisi')
 

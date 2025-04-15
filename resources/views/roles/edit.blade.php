@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Role - Pazar Admin')
+@section('title', 'Edit Role - Pazar User Admin')
 
 @section('page-title', 'Edit Role')
 

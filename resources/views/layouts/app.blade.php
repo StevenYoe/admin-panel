@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Pazar Admin Dashboard')</title>
+    <title>@yield('title', 'Pazar User Admin Dashboard')</title>
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js untuk interaktivitas -->
@@ -53,7 +53,7 @@
             </button>
             
             <div>
-                <h1 class="text-xl font-bold text-gray-custom">Pazar Admin</h1>
+                <h1 class="text-xl font-bold text-gray-custom">Pazar User Admin</h1>
             </div>
             
             <div x-data="{ open: false }" class="relative">

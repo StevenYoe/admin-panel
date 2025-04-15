@@ -1,12 +1,12 @@
 @extends('layouts.auth')
 
-@section('title', 'Login - Pazar Admin')
+@section('title', 'Login - Pazar User Admin')
 
 @section('content')
 <div class="flex items-center justify-center min-h-screen p-4">
     <div class="w-full max-w-md p-6 bg-bg-dark border border-gray-700 rounded-lg shadow-lg">
         <div class="text-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-custom">Pazar Admin Login</h1>
+            <h1 class="text-2xl font-bold text-gray-custom">Pazar User Admin Login</h1>
         </div>
 
         @if ($errors->any())
