@@ -18,7 +18,7 @@ class AuthController extends BaseController
         if (!session()->has('swal_msg')) {
             Session::flash('swal_type', 'info');
             Session::flash('swal_title', 'Welcome');
-            Session::flash('swal_msg', 'Please login to access the admin panel.');
+            Session::flash('swal_msg', 'Please login to access the user admin panel.');
         }
         
         return view('auth.login');
