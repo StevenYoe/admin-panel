@@ -36,6 +36,9 @@ class AuthController extends BaseController
             'email' => 'required|email',
             'password' => 'required',
         ]);
+        
+        // Convert email to lowercase before sending to API
+        $credentials['email'] = strtolower($credentials['email']);
     
         // Call API to authenticate
         $response = $this->apiPost('/login', $credentials);
