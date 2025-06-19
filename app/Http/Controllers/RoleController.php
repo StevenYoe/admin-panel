@@ -17,7 +17,8 @@ class RoleController extends BaseController
         $params = [
             'sort_by' => $request->input('sort_by', 'role_id'),
             'sort_order' => $request->input('sort_order', 'asc'),
-            'per_page' => $request->input('per_page', 10)
+            'per_page' => $request->input('per_page', 10),
+            'page' => $request->input('page', 1)
         ];
     
         $response = $this->apiGet('/roles', $params);
