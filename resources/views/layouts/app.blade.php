@@ -1,18 +1,30 @@
+<!--
+    Main Application Layout (app.blade.php)
+    - Provides the overall structure for all pages in the admin panel
+    - Includes header, sidebar navigation, and main content area
+    - Uses Tailwind CSS for styling and Alpine.js for interactivity
+    - Displays user profile and dropdown menu in the header
+    - Sidebar contains navigation links to all main sections
+    - Main area displays page title, alerts, and dynamic content
+    - Supports dark mode and responsive design
+    - Integrates SweetAlert2 for notifications
+-->
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
+    <!-- Meta and title setup -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Pazar User Admin Dashboard')</title>
     <link rel="icon" href="img/Logo.ico" type="image/x-icon">
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Alpine.js untuk interaktivitas -->
+    <!-- Alpine.js for interactivity -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- SweetAlert2 -->
+    <!-- SweetAlert2 for notifications -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Konfigurasi Tailwind untuk tema
+        // Tailwind theme configuration
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -22,16 +34,6 @@
                         'gray-custom': '#E0FBFC',
                         'bg-dark': '#253237',
                     }
-                    // colors: {
-                    //     'accent': '#BF161C',
-                    //     'gray-custom': '#E0FBFC',
-                    //     'bg-dark': '#253237',
-                    // }
-                    // colors: {
-                    //     'accent': '#253237',
-                    //     'gray-custom': '#E0FBFC',
-                    //     'bg-dark': '#BF161C',
-                    // }
                 }
             }
         }
@@ -43,10 +45,10 @@
 <body x-data="{ sidebarOpen: true }" 
       class="dark bg-bg-dark text-gray-custom min-h-screen transition-all duration-200">
     
-    <!-- Header -->
+    <!-- Header section with sidebar toggle, title, and user profile -->
     <header class="fixed top-0 z-30 w-full bg-bg-dark border-b border-gray-700 shadow">
         <div class="flex items-center justify-between h-16 px-4">
-            <!-- Toggle sidebar button -->
+            <!-- Sidebar toggle button -->
             <button @click="sidebarOpen = !sidebarOpen" class="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -58,7 +60,7 @@
             </div>
             
             <div x-data="{ open: false }" class="relative">
-                <!-- Profile button -->
+                <!-- Profile button and dropdown -->
                 <button @click="open = !open" class="flex items-center space-x-2 focus:outline-none">
                     <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden">
                         @if(session('user') && session('user')['u_profile_image'])
@@ -73,7 +75,7 @@
                     </div>
                 </button>
                 
-                <!-- Dropdown menu -->
+                <!-- Dropdown menu for profile and logout -->
                 <div x-show="open" 
                     @click.away="open = false"
                     x-transition:enter="transition ease-out duration-100" 
@@ -88,7 +90,7 @@
                         <div class="px-4 py-2 border-b border-gray-700">
                             <div class="flex items-center">
                                 <div class="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center mr-3 overflow-hidden">
-                                    <!-- Di app.blade.php, ganti bagian profil image dengan kode berikut -->
+                                    <!-- User profile image or icon -->
                                     @if(session('user') && session('user')['u_profile_image'])
                                         <img src="{{ config('app.storage_url') . '/' . session('user')['u_profile_image'] }}?t={{ time() }}" 
                                             alt="Profile" 
@@ -134,13 +136,14 @@
         </div>
     </header>
 
-    <!-- Sidebar -->
+    <!-- Sidebar navigation -->
     <div class="flex pt-2">
         <aside 
             :class="sidebarOpen ? 'translate-x-0 w-48' : 'w-0 -translate-x-full'"
             class="fixed z-20 inset-y-0 left-0 mt-16 transition-all duration-300 transform h-full bg-bg-dark border-r border-gray-700 overflow-hidden">
             
             <nav class="p-4 space-y-2 overflow-y-auto h-full">
+                <!-- Navigation links for all main sections -->
                 <a href="{{ route('dashboard') }}" class="flex items-center p-2 rounded-lg hover:bg-gray-700 
                         {{ request()->routeIs('dashboard') ? 'bg-gray-700' : '' }}">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -191,7 +194,7 @@
             </nav>
         </aside>
 
-        <!-- Content -->
+        <!-- Main content area -->
         <main 
             :class="sidebarOpen ? 'ml-48' : 'ml-0'"
             class="flex-1 min-h-screen p-6 pt-20 transition-all duration-300">
@@ -199,6 +202,7 @@
                 <h1 class="text-2xl font-bold">@yield('page-title', 'Dashboard')</h1>
             </div>
             
+            <!-- Success and error alert messages -->
             @if(session('success'))
                 <div class="p-4 mb-6 text-green-100 bg-green-800 border-l-4 border-green-500" role="alert">
                     <p>{{ session('success') }}</p>
@@ -211,9 +215,11 @@
                 </div>
             @endif
             
+            <!-- Dynamic page content -->
             @yield('content')
         </main>
     </div>
+    <!-- SweetAlert2 notification script -->
     <script>
         @if(session('swal_msg'))
             Swal.fire({

@@ -1,3 +1,12 @@
+<!--
+    Division List Page
+    - Extends the main application layout
+    - Displays a list of all divisions in a table format
+    - Super Admins can add, edit, or delete divisions
+    - Uses Blade components for table, buttons, and cards
+    - Supports sorting and pagination
+    - Styled with Tailwind CSS utility classes
+-->
 @extends('layouts.app')
 
 @section('title', 'Divisi - Pazar User Admin')
@@ -5,6 +14,7 @@
 @section('page-title', 'Divisi')
 
 @section('content')
+    <!-- Header section with page title and Add Division button (for Super Admin) -->
     <div class="mb-6 flex justify-between items-center">
         <h2 class="text-xl font-semibold">Daftar Divisi</h2>
         @if($isSuperAdmin)
@@ -17,9 +27,11 @@
         @endif
     </div>
     
+    <!-- Card container for the division table -->
     <x-card>
         @if(count($divisions) > 0)
             <div class="overflow-x-auto">
+            <!-- Table displaying division data -->
             <x-table 
                 :headers="[
                     ['name' => 'ID', 'key' => 'div_id'],
@@ -36,6 +48,7 @@
                         <td class="px-5 py-4 text-center">{{ $division['div_code'] }}</td>
                         <td class="px-5 py-4 text-center">{{ $division['div_name'] }}</td>
                         <td class="px-5 py-4 text-center">
+                            <!-- Display status badge -->
                             @if($division['div_is_active'])
                                 <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-700 text-white">
                                     Active
@@ -47,6 +60,7 @@
                             @endif
                         </td>
                         <td class="px-5 py-4 text-center">
+                            <!-- Action buttons: View, Edit, Delete (Edit/Delete for Super Admin only) -->
                             <div class="flex justify-center space-x-2">
                                 <a href="{{ route('divisions.show', $division['div_id']) }}" class="text-blue-500 hover:text-blue-700">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -76,12 +90,14 @@
                 @endforeach
             </x-table>
         </div>
+        <!-- Pagination links if available -->
         @if(isset($paginator))
             <div class="mt-4">
                 {{ $paginator->links() }}
             </div>
         @endif
         @else
+            <!-- Message and button if no divisions exist -->
             <div class="py-8 text-center">
                 <p class="text-gray-400">Belum ada divisi yang ditambahkan</p>
                 <x-button href="{{ route('divisions.create') }}" variant="primary" class="mt-4">

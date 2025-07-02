@@ -1,3 +1,12 @@
+<!--
+    Division Detail Page
+    - Extends the main application layout
+    - Displays detailed information about a specific division
+    - Super Admins can edit or delete the division
+    - Shows a list of users belonging to this division
+    - Uses Blade components for cards, tables, and buttons
+    - Styled with Tailwind CSS utility classes
+-->
 @extends('layouts.app')
 
 @section('title', 'Detail Divisi - Pazar User Admin')
@@ -5,6 +14,7 @@
 @section('page-title', 'Detail Divisi')
 
 @section('content')
+    <!-- Header section with Back button and Edit/Delete actions (for Super Admin) -->
     <div class="mb-6 flex justify-between items-center">
         <x-button href="{{ route('divisions.index') }}" variant="outline">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -36,6 +46,7 @@
         </div>
     </div>
     
+    <!-- Division information card -->
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div class="lg:col-span-2">
             <x-card title="Informasi Divisi">
@@ -58,6 +69,7 @@
                     <div>
                         <h4 class="text-sm font-medium text-gray-400">Status</h4>
                         <p>
+                            <!-- Display status badge -->
                             @if($division['div_is_active'])
                                 <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-700 text-white">
                                     Active
@@ -74,10 +86,12 @@
         </div>
     </div>
     
+    <!-- Card with list of users in this division -->
     <div class="mt-6">
         <x-card title="Daftar Pengguna Divisi Ini">
             @if(!empty($division['users']) && count($division['users']) > 0)
                 <div class="overflow-x-auto">
+                    <!-- Table displaying users in the division -->
                     <x-table :headers="['ID', 'Nama', 'Email', 'Jabatan']">
                         @foreach($division['users'] as $user)
                             <tr class="border-b dark:border-gray-700 hover:bg-gray-600">
@@ -88,6 +102,7 @@
                                     {{ $user['position'] ? $user['position']['pos_name'] : '-' }}
                                 </td>
                                 <td class="px-5 py-4 text-center">
+                                    <!-- View user details button -->
                                     <div class="flex justify-center space-x-2">
                                         <a href="{{ route('users.show', $user['u_id']) }}" class="text-blue-500 hover:text-blue-700">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -102,6 +117,7 @@
                     </x-table>
                 </div>
             @else
+                <!-- Message if no users in this division -->
                 <div class="py-4 text-center">
                     <p class="text-gray-400">Divisi ini belum memiliki pengguna</p>
                 </div>

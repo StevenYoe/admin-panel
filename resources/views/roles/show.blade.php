@@ -1,3 +1,12 @@
+<!--
+    Role Detail Page
+    - Extends the main application layout
+    - Displays detailed information about a specific user role
+    - Super Admins can edit or delete the role
+    - Shows a list of users assigned to this role
+    - Uses Blade components for cards, buttons, and user lists
+    - Styled with Tailwind CSS utility classes
+-->
 @extends('layouts.app')
 
 @section('title', 'Detail Role - Pazar User Admin')
@@ -5,6 +14,7 @@
 @section('page-title', 'Detail Role')
 
 @section('content')
+    <!-- Header section with Back button and Edit/Delete actions (for Super Admin) -->
     <div class="mb-6 flex justify-between items-center">
         <x-button href="{{ route('roles.index') }}" variant="outline">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -37,6 +47,7 @@
     </div>
     
     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <!-- Card with role information -->
         <x-card title="Informasi Role">
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
@@ -57,6 +68,7 @@
                 <div>
                     <h4 class="text-sm font-medium text-gray-400">Status</h4>
                     <p>
+                        <!-- Display status badge -->
                         @if($role['role_is_active'])
                             <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-700 text-white">
                                 Active
@@ -71,6 +83,7 @@
             </div>
         </x-card>
         
+        <!-- Card with users assigned to this role -->
         <x-card title="Pengguna dengan Role Ini">
             @if(!empty($role['users']) && count($role['users']) > 0)
                 <div class="space-y-3">
@@ -81,6 +94,7 @@
                                     <h5 class="font-semibold">{{ $user['u_name'] }}</h5>
                                     <p class="text-sm text-gray-400">{{ $user['u_email'] }}</p>
                                 </div>
+                                <!-- View user details button -->
                                 <a href="{{ route('users.show', $user['u_id']) }}" class="text-blue-500 hover:text-blue-700">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -92,6 +106,7 @@
                     @endforeach
                 </div>
             @else
+                <!-- Message if no users have this role -->
                 <div class="py-4 text-center">
                     <p class="text-gray-400">Tidak ada pengguna dengan role ini</p>
                 </div>

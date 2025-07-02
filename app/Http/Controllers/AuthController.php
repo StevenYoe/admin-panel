@@ -5,10 +5,19 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 
+// AuthController handles user authentication logic for the admin panel.
+// It provides methods for showing the login form, processing login requests,
+// and handling user logout. All authentication-related session and API logic
+// is centralized here for maintainability and clarity.
+
 class AuthController extends BaseController
 {
     /**
      * Show login form
+     *
+     * Displays the login page and sets a welcome message using SweetAlert
+     * if the user is not coming from a redirect. This helps guide users
+     * to log in before accessing the admin panel.
      *
      * @return \Illuminate\View\View
      */
@@ -26,6 +35,10 @@ class AuthController extends BaseController
 
     /**
      * Handle login request
+     *
+     * Validates user credentials, sends them to the API for authentication,
+     * and manages session data on success or failure. Displays appropriate
+     * SweetAlert messages for user feedback.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse
@@ -46,6 +59,7 @@ class AuthController extends BaseController
         \Log::info('Login API Response:', ['response' => $response]);
         
         if (!isset($response['success']) || !$response['success']) {
+            // Handle failed login attempts and display user-friendly error messages
             $errorTitle = 'Login Failed';
             $errorMsg = 'An error occurred while trying to log in. Please try again.';
             
@@ -72,12 +86,12 @@ class AuthController extends BaseController
             return back()->withInput($request->only('email'));
         }
 
-        // Success path remains the same
+        // On successful login, store authentication data in session
         Session::put('auth_token', $response['data']['token']);
         Session::put('user', $response['data']['user']);
         Session::put('roles', $response['data']['roles'] ?? []);
 
-        // Add SweetAlert message
+        // Add SweetAlert message for successful login
         Session::flash('swal_type', 'success');
         Session::flash('swal_title', 'Login Successful');
         Session::flash('swal_msg', 'Welcome back, ' . $response['data']['user']['u_name'] . '!');
@@ -87,6 +101,9 @@ class AuthController extends BaseController
 
     /**
      * Handle logout request
+     *
+     * Calls the API to log out the user, clears session data, and redirects
+     * to the login page with a logout confirmation message.
      *
      * @return \Illuminate\Http\RedirectResponse
      */
@@ -98,7 +115,7 @@ class AuthController extends BaseController
         // Clear session data
         Session::forget(['auth_token', 'user', 'roles']);
 
-        // Add SweetAlert message
+        // Add SweetAlert message for successful logout
         Session::flash('swal_type', 'success');
         Session::flash('swal_title', 'Logged Out');
         Session::flash('swal_msg', 'You have been successfully logged out.');

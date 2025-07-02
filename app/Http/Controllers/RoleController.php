@@ -5,11 +5,19 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
+// RoleController manages CRUD operations for role resources in the admin panel.
+// It communicates with the API to fetch, create, update, and delete role data,
+// and enforces superadmin access control for sensitive actions.
+
 class RoleController extends BaseController
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the roles with pagination, sorting, and access control.
      *
+     * Fetches role data from the API, builds a paginator, and passes all relevant
+     * variables to the index view. Handles API errors gracefully and supports AJAX requests.
+     *
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
@@ -61,7 +69,9 @@ class RoleController extends BaseController
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Show the form for creating a new role.
+     *
+     * Only accessible to superadmins. Redirects unauthorized users.
      *
      * @return \Illuminate\Http\Response
      */
@@ -77,7 +87,10 @@ class RoleController extends BaseController
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created role in storage.
+     *
+     * Validates input, checks superadmin access, and sends data to the API.
+     * Handles API errors and redirects with appropriate messages.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
@@ -113,7 +126,10 @@ class RoleController extends BaseController
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified role's details.
+     *
+     * Fetches role data from the API and passes it to the show view.
+     * Also passes superadmin status for conditional UI rendering.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
@@ -134,7 +150,9 @@ class RoleController extends BaseController
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Show the form for editing the specified role.
+     *
+     * Only accessible to superadmins. Fetches role data for editing.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
@@ -158,7 +176,10 @@ class RoleController extends BaseController
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified role in storage.
+     *
+     * Validates input, checks superadmin access, and updates data via the API.
+     * Handles API errors and redirects with appropriate messages.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
@@ -195,7 +216,9 @@ class RoleController extends BaseController
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified role from storage.
+     *
+     * Only accessible to superadmins. Deletes the role via the API and handles errors.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response

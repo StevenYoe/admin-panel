@@ -1,3 +1,12 @@
+<!--
+    User Profile Page
+    - Extends the main application layout
+    - Displays detailed information about the currently logged-in user
+    - Shows profile image, employee ID, name, email, division, position, join date, and roles
+    - Includes a logout button
+    - Uses Blade components for cards and buttons
+    - Styled with Tailwind CSS utility classes
+-->
 @extends('layouts.app')
 
 @section('title', 'Profil Saya - Pazar User Admin')
@@ -5,6 +14,7 @@
 @section('page-title', 'Profil Saya')
 
 @section('content')
+    <!-- Card container for profile details -->
     <x-card>
         <div class="mb-4">
             <h2 class="text-xl font-semibold">Detail Profil</h2>
@@ -14,6 +24,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                 <div class="mb-4">
+                    <!-- User profile image or icon -->
                     <div class="w-20 h-20 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden">
                         @if($user && $user['u_profile_image'])
                         <img src="{{ config('app.storage_url') . '/' . $user['u_profile_image'] }}" 
@@ -76,6 +87,7 @@
                 </div>
             </div>
             
+            <!-- Logout button -->
             <div class="mt-6 border-t border-gray-700 pt-4">
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
@@ -90,6 +102,7 @@
                 </form>
             </div>
         @else
+            <!-- Message if profile data is not available -->
             <div class="py-8 text-center">
                 <p class="text-gray-400">Data profil tidak tersedia</p>
             </div>

@@ -1,3 +1,12 @@
+<!--
+    Dashboard Page
+    - Extends the main application layout
+    - Displays summary cards for users, roles, divisions, and positions
+    - Shows statistics for active users and new users this month
+    - Includes tables for users per division and users per position
+    - Uses Blade components for cards and tables
+    - Styled with Tailwind CSS utility classes
+-->
 @extends('layouts.app')
 
 @section('title', 'Dashboard - Pazar User Admin')
@@ -5,7 +14,7 @@
 @section('page-title', 'Dashboard')
 
 @section('content')
-    <!-- Top Cards Row -->
+    <!-- Top Cards Row: User, Role, Division, Position statistics -->
     <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
         <!-- Card 1: Total Users -->
         <x-card class="border-l-4 border-purple-500">
@@ -68,7 +77,7 @@
         </x-card>
     </div>
 
-    <!-- Mid Cards Row -->
+    <!-- Mid Cards Row: Active users and new users this month -->
     <div class="grid grid-cols-1 gap-6 mt-6 md:grid-cols-2">
         <!-- Active Users Card -->
         <x-card class="border-l-4 border-cyan-500">
@@ -101,7 +110,7 @@
         </x-card>
     </div>
 
-    <!-- Table Section -->
+    <!-- Table Section: Users per division and position -->
     <div class="grid grid-cols-1 gap-6 mt-6 md:grid-cols-2">
         <!-- Users Per Division Table -->
         <x-card>

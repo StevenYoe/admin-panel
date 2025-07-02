@@ -1,3 +1,12 @@
+<!--
+    Role List Page
+    - Extends the main application layout
+    - Displays a list of all user roles in a table format
+    - Super Admins can add, edit, or delete roles
+    - Uses Blade components for table, buttons, and cards
+    - Supports sorting and pagination
+    - Styled with Tailwind CSS utility classes
+-->
 @extends('layouts.app')
 
 @section('title', 'Role - Pazar User Admin')
@@ -5,6 +14,7 @@
 @section('page-title', 'Role')
 
 @section('content')
+    <!-- Header section with page title and Add Role button (for Super Admin) -->
     <div class="mb-6 flex justify-between items-center">
         <h2 class="text-xl font-semibold">Daftar Role</h2>
         @if($isSuperAdmin)
@@ -17,8 +27,10 @@
         @endif
     </div>
     
+    <!-- Card container for the role table -->
     <x-card>
         @if(count($roles) > 0)
+        <!-- Table displaying role data -->
         <x-table 
             :headers="[
                 ['name' => 'ID', 'key' => 'role_id'],
@@ -37,6 +49,7 @@
                     <td class="px-5 py-4 text-center">{{ $role['role_level'] }}</td>
                     <td class="px-5 py-4 text-center">{{ $role['users_count'] ?? 0 }}</td>
                     <td class="px-5 py-4 text-center">
+                        <!-- Display status badge -->
                         @if($role['role_is_active'])
                             <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-700 text-white">
                                 Active
@@ -48,6 +61,7 @@
                         @endif
                     </td>
                     <td class="px-5 py-4 text-center">
+                        <!-- Action buttons: View, Edit, Delete (Edit/Delete for Super Admin only) -->
                         <div class="flex justify-center space-x-2">
                             <a href="{{ route('roles.show', $role['role_id']) }}" class="text-blue-500 hover:text-blue-700">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -76,12 +90,14 @@
                 </tr>
             @endforeach
         </x-table>
+        <!-- Pagination links if available -->
         @if(isset($paginator))
             <div class="mt-4">
                 {{ $paginator->links() }}
             </div>
         @endif
         @else
+            <!-- Message and button if no roles exist -->
             <div class="py-8 text-center">
                 <p class="text-gray-400">Belum ada role yang ditambahkan</p>
                 <x-button href="{{ route('roles.create') }}" variant="primary" class="mt-4">

@@ -1,4 +1,13 @@
-<!-- index.blade.php -->
+<!--
+    User List Page
+    - Extends the main application layout
+    - Displays a list of all users in a table format
+    - Super Admins can add, edit, or delete users
+    - Uses Blade components for table, buttons, and cards
+    - Supports sorting and pagination
+    - Shows user details including roles, division, position, and status
+    - Styled with Tailwind CSS utility classes
+-->
 @extends('layouts.app')
 
 @section('title', 'Pengguna - Pazar User Admin')
@@ -6,6 +15,7 @@
 @section('page-title', 'Pengguna')
 
 @section('content')
+    <!-- Header section with page title and Add User button (for Super Admin) -->
     <div class="mb-6 flex justify-between items-center">
         <h2 class="text-xl font-semibold">Daftar Pengguna</h2>
         @if($isSuperAdmin)
@@ -18,6 +28,7 @@
         @endif
     </div>
     
+    <!-- Card container for the user table -->
     <x-card>
         @if(session('error'))
             <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-700 dark:text-red-100">
@@ -27,6 +38,7 @@
 
         @if(count($users) > 0)
             <div class="overflow-x-auto">
+                <!-- Table displaying user data -->
                 <x-table 
                     :headers="[
                         ['name' => 'ID', 'key' => 'u_id'],
@@ -54,6 +66,7 @@
                                 {{ $user['position'] ? $user['position']['pos_name'] : '-' }}
                             </td>
                             <td class="px-5 py-4 text-center">
+                                <!-- Display user roles -->
                                 @if(!empty($user['roles']))
                                     <div class="flex justify-center flex-wrap gap-1">
                                         @foreach($user['roles'] as $role)
@@ -67,6 +80,7 @@
                                 @endif
                             </td>
                             <td class="px-5 py-4 text-center">
+                                <!-- Display status badge -->
                                 @if($user['u_is_active'])
                                     <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-700 text-white">
                                         Active
@@ -78,6 +92,7 @@
                                 @endif
                             </td>
                             <td class="px-5 py-4 text-center">
+                                <!-- Action buttons: View, Edit, Delete (Edit/Delete for Super Admin only) -->
                                 <div class="flex justify-center space-x-2">
                                     <a href="{{ route('users.show', $user['u_id']) }}" class="text-blue-500 hover:text-blue-700">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -107,12 +122,14 @@
                     @endforeach
                 </x-table>
             </div>
+            <!-- Pagination links if available -->
             @if(isset($paginator))
                 <div class="mt-4">
                     {{ $paginator->links() }}
                 </div>
             @endif
             @else
+            <!-- Message and button if no users exist -->
             <div class="py-8 text-center">
                 <p class="text-gray-400">Belum ada pengguna yang ditambahkan</p>
                 @if($isSuperAdmin)

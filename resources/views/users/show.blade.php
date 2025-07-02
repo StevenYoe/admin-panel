@@ -1,3 +1,12 @@
+<!--
+    User Detail Page
+    - Extends the main application layout
+    - Displays detailed information about a specific user
+    - Super Admins can edit or delete the user
+    - Shows user details, organization info, and assigned roles
+    - Uses Blade components for cards and buttons
+    - Styled with Tailwind CSS utility classes
+-->
 @extends('layouts.app')
 
 @section('title', 'Detail Pengguna - Pazar User Admin')
@@ -5,6 +14,7 @@
 @section('page-title', 'Detail Pengguna')
 
 @section('content')
+    <!-- Header section with Back button and Edit/Delete actions (for Super Admin) -->
     <div class="mb-6 flex justify-between items-center">
         <x-button href="{{ route('users.index') }}" variant="outline">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -38,6 +48,7 @@
     
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div class="lg:col-span-2">
+            <!-- Card with user information -->
             <x-card title="Informasi Pengguna">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
@@ -78,6 +89,7 @@
                     <div>
                         <h4 class="text-sm font-medium text-gray-400">Status</h4>
                         <p>
+                            <!-- Display status badge -->
                             @if($user['u_is_active'])
                                 <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-700 text-white">
                                     Active
@@ -93,6 +105,7 @@
                     <div>
                         <h4 class="text-sm font-medium text-gray-400">Peran Manajerial</h4>
                         <p>
+                            <!-- Display manager/staff badge -->
                             @if($user['u_is_manager'])
                                 <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-700 text-white">
                                     Manager
@@ -112,6 +125,7 @@
                 </div>
             </x-card>
             
+            <!-- Card with organization information -->
             <x-card title="Informasi Organisasi" class="mt-6">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
@@ -133,6 +147,7 @@
         </div>
         
         <div>
+            <!-- Card with user roles -->
             <x-card title="Role">
                 @if(!empty($user['roles']))
                     <div class="space-y-3">

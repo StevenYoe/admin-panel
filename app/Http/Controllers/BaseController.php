@@ -6,17 +6,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
 
+// BaseController provides shared logic for all controllers in the admin panel.
+// It centralizes API communication, role-based access control, and utility methods
+// to ensure consistency and reduce code duplication across the application.
+
 class BaseController extends Controller
 {
     /**
-     * URL dasar API
+     * The base URL for API requests, loaded from config or environment.
      *
      * @var string
      */
     protected $baseUrl;
 
     /**
-     * Constructor
+     * Constructor: Initializes the base API URL from configuration.
      */
     public function __construct()
     {
@@ -24,9 +28,12 @@ class BaseController extends Controller
     }
 
     /**
-     * Check if the current user is a superadmin
-     * 
-     * @return bool
+     * Check if the current user is a superadmin.
+     *
+     * Looks for the 'superadmin' role in the session's roles array.
+     * Supports both array of strings and array of role objects.
+     *
+     * @return bool True if user is superadmin, false otherwise.
      */
     protected function isSuperAdmin()
     {
@@ -52,9 +59,10 @@ class BaseController extends Controller
     }
 
     /**
-     * Check if the current user has permission to perform CRUD operations
-     * Redirects to index with error message if not authorized
-     * 
+     * Check if the current user has permission to perform CRUD operations.
+     *
+     * If not a superadmin, flashes an error message and optionally redirects.
+     *
      * @param string $route Route to redirect to if not authorized
      * @return bool True if authorized, otherwise redirects
      */
@@ -76,7 +84,7 @@ class BaseController extends Controller
     }
 
     /**
-     * Melakukan GET request ke API
+     * Send a GET request to the API.
      *
      * @param string $endpoint
      * @param array $params
@@ -88,7 +96,7 @@ class BaseController extends Controller
     }
 
     /**
-     * Melakukan POST request ke API
+     * Send a POST request to the API.
      *
      * @param string $endpoint
      * @param array $data
@@ -100,7 +108,7 @@ class BaseController extends Controller
     }
 
     /**
-     * Melakukan PUT request ke API
+     * Send a PUT request to the API.
      *
      * @param string $endpoint
      * @param array $data
@@ -112,7 +120,7 @@ class BaseController extends Controller
     }
 
     /**
-     * Melakukan DELETE request ke API
+     * Send a DELETE request to the API.
      *
      * @param string $endpoint
      * @return mixed
@@ -123,12 +131,14 @@ class BaseController extends Controller
     }
 
     /**
-     * Melakukan HTTP request ke API
+     * Core method to send HTTP requests to the API.
+     * Handles authentication, file uploads, error handling, and response parsing.
+     * Logs requests and responses for debugging. Redirects to login on 401 errors (except for login endpoint).
      *
-     * @param string $method
-     * @param string $endpoint
-     * @param array $data
-     * @return mixed
+     * @param string $method HTTP method (get, post, put, delete)
+     * @param string $endpoint API endpoint
+     * @param array $data Request data or parameters
+     * @return mixed API response as array or error structure
      */
     protected function apiRequest($method, $endpoint, $data = [])
     {

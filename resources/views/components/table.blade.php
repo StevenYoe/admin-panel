@@ -1,3 +1,15 @@
+<!--
+    Table Component (table.blade.php)
+    ------------------------------------------------
+    This Blade component renders a styled table with sortable headers for displaying tabular data.
+    - Accepts props for headers, current sort column, and sort order.
+    - Dynamically generates table headers with sorting links and indicators.
+    - Renders the table body using the provided slot content.
+    - Includes an Action column for row-level actions (edit, delete, etc.).
+    - Uses Tailwind CSS classes for consistent styling and dark mode support.
+    - Includes a style block for sort indicator transitions.
+-->
+
 @props([
     'headers' => [], // Format: [['name' => 'ID', 'key' => 'id'], ...]
     'sortBy' => null,
@@ -10,6 +22,7 @@
             <tr>
             @foreach($headers as $header)
     @php
+        // Determine header name, key, and sorting state
         if (is_array($header)) {
             $headerName = $header['name'];
             $headerKey = $header['key'];
@@ -27,6 +40,7 @@
         ]);
     @endphp
     
+    <!-- Table header cell with sorting support -->
     <th 
         scope="col" 
         class="text-center px-5 py-3 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
@@ -47,8 +61,9 @@
         </div>
     </th>
 @endforeach
+                <!-- Action column for row-level actions -->
                 <th scope="col" class="text-center px-5 py-3">
-                    Aksi
+                    Action
                 </th>
             </tr>
         </thead>
@@ -59,6 +74,7 @@
 </div>
 
 <style>
+    /* Style for the sort indicator arrow */
     .sort-indicator {
         transition: transform 0.2s;
         font-size: 0.8em;

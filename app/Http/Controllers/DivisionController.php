@@ -5,11 +5,19 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
+// DivisionController manages CRUD operations for division resources in the admin panel.
+// It communicates with the API to fetch, create, update, and delete division data,
+// and enforces superadmin access control for sensitive actions.
+
 class DivisionController extends BaseController
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the divisions with pagination, sorting, and access control.
      *
+     * Fetches division data from the API, builds a paginator, and passes all relevant
+     * variables to the index view. Handles API errors gracefully.
+     *
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
@@ -57,7 +65,9 @@ class DivisionController extends BaseController
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Show the form for creating a new division.
+     *
+     * Only accessible to superadmins. Redirects unauthorized users.
      *
      * @return \Illuminate\Http\Response
      */
@@ -73,7 +83,10 @@ class DivisionController extends BaseController
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created division in storage.
+     *
+     * Validates input, checks superadmin access, and sends data to the API.
+     * Handles API errors and redirects with appropriate messages.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
@@ -109,7 +122,10 @@ class DivisionController extends BaseController
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified division's details.
+     *
+     * Fetches division data from the API and passes it to the show view.
+     * Also passes superadmin status for conditional UI rendering.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
@@ -133,7 +149,9 @@ class DivisionController extends BaseController
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Show the form for editing the specified division.
+     *
+     * Only accessible to superadmins. Fetches division data for editing.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
@@ -157,7 +175,10 @@ class DivisionController extends BaseController
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified division in storage.
+     *
+     * Validates input, checks superadmin access, and updates data via the API.
+     * Handles API errors and redirects with appropriate messages.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
@@ -194,7 +215,9 @@ class DivisionController extends BaseController
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified division from storage.
+     *
+     * Only accessible to superadmins. Deletes the division via the API and handles errors.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response

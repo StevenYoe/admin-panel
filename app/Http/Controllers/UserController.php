@@ -6,63 +6,74 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Pagination\LengthAwarePaginator;
 
+// UserController manages CRUD operations for user resources in the admin panel.
+// It communicates with the API to fetch, create, update, and delete user data,
+// handles file uploads, and enforces superadmin access control for sensitive actions.
+// It also prepares data for dropdowns and manages session updates for the logged-in user.
+
 class UserController extends BaseController
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the users with pagination, sorting, and access control.
      *
+     * Fetches user data from the API, builds a paginator, and passes all relevant
+     * variables to the index view. Handles API errors gracefully and supports AJAX requests.
+     *
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\View\View
      */
     public function index(Request $request)
-{
-    $params = [
-        'sort_by' => $request->input('sort_by', 'u_id'),
-        'sort_order' => $request->input('sort_order', 'asc'),
-        'per_page' => $request->input('per_page', 10),
-        'page' => $request->input('page', 1)
-    ];
+    {
+        $params = [
+            'sort_by' => $request->input('sort_by', 'u_id'),
+            'sort_order' => $request->input('sort_order', 'asc'),
+            'per_page' => $request->input('per_page', 10),
+            'page' => $request->input('page', 1)
+        ];
 
-    $response = $this->apiGet('/users', $params);
-    
-    // Check if the response is valid and has data
-    if (!isset($response['success']) || !$response['success']) {
-        return view('users.index')->with('error', $response['message'] ?? 'Failed to fetch users');
-    }
-    
-    $users = $response['data']['data'] ?? [];
-    
-    // Create a proper paginator instance if we have the necessary pagination data
-    $paginator = null;
-    if (isset($response['data'])) {
-        $paginationData = $response['data'];
-        if (isset($paginationData['current_page']) && isset($paginationData['per_page']) && isset($paginationData['total'])) {
-            $paginator = new LengthAwarePaginator(
-                $users,
-                $paginationData['total'],
-                $paginationData['per_page'],
-                $paginationData['current_page'],
-                [
-                    'path' => request()->url(),
-                    'query' => $request->query()
-                ]
-            );
+        $response = $this->apiGet('/users', $params);
+        
+        // Check if the response is valid and has data
+        if (!isset($response['success']) || !$response['success']) {
+            return view('users.index')->with('error', $response['message'] ?? 'Failed to fetch users');
         }
-    }
+        
+        $users = $response['data']['data'] ?? [];
+        
+        // Create a proper paginator instance if we have the necessary pagination data
+        $paginator = null;
+        if (isset($response['data'])) {
+            $paginationData = $response['data'];
+            if (isset($paginationData['current_page']) && isset($paginationData['per_page']) && isset($paginationData['total'])) {
+                $paginator = new LengthAwarePaginator(
+                    $users,
+                    $paginationData['total'],
+                    $paginationData['per_page'],
+                    $paginationData['current_page'],
+                    [
+                        'path' => request()->url(),
+                        'query' => $request->query()
+                    ]
+                );
+            }
+        }
 
-    $sortBy = $params['sort_by'];
-    $sortOrder = $params['sort_order'];
-    $isSuperAdmin = $this->isSuperAdmin();
-    
-    // Check if this is an AJAX request
-    if ($request->ajax() || $request->has('ajax')) {
-        return view('users.table-content', compact('users', 'paginator', 'sortBy', 'sortOrder', 'isSuperAdmin'))->render();
+        $sortBy = $params['sort_by'];
+        $sortOrder = $params['sort_order'];
+        $isSuperAdmin = $this->isSuperAdmin();
+        
+        // Check if this is an AJAX request
+        if ($request->ajax() || $request->has('ajax')) {
+            return view('users.table-content', compact('users', 'paginator', 'sortBy', 'sortOrder', 'isSuperAdmin'))->render();
+        }
+        
+        return view('users.index', compact('users', 'paginator', 'sortBy', 'sortOrder', 'isSuperAdmin'));
     }
-    
-    return view('users.index', compact('users', 'paginator', 'sortBy', 'sortOrder', 'isSuperAdmin'));
-}
 
     /**
-     * Show the form for creating a new resource.
+     * Show the form for creating a new user.
+     *
+     * Only accessible to superadmins. Fetches divisions, positions, and roles for dropdowns.
      *
      * @return \Illuminate\View\View
      */
@@ -119,7 +130,10 @@ class UserController extends BaseController
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created user in storage.
+     *
+     * Validates input, checks superadmin access, handles file uploads, and sends data to the API.
+     * Handles API errors and redirects with appropriate messages.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse
@@ -159,7 +173,10 @@ class UserController extends BaseController
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified user's details.
+     *
+     * Fetches user data from the API and passes it to the show view.
+     * Also passes superadmin status for conditional UI rendering.
      *
      * @param  int  $id
      * @return \Illuminate\View\View
@@ -182,7 +199,9 @@ class UserController extends BaseController
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Show the form for editing the specified user.
+     *
+     * Only accessible to superadmins. Fetches user, divisions, positions, and roles for editing.
      *
      * @param  int  $id
      * @return \Illuminate\View\View
@@ -255,7 +274,10 @@ class UserController extends BaseController
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified user in storage.
+     *
+     * Validates input, checks superadmin access, handles file uploads, and updates data via the API.
+     * Updates session data if the logged-in user is updated. Handles API errors and redirects with appropriate messages.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
@@ -307,7 +329,9 @@ class UserController extends BaseController
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified user from storage.
+     *
+     * Only accessible to superadmins. Deletes the user via the API and handles errors.
      *
      * @param  int  $id
      * @return \Illuminate\Http\RedirectResponse

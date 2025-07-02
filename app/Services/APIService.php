@@ -6,11 +6,19 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
 
+// ApiService provides a centralized way to interact with external APIs for the application.
+// It handles authentication, token management, and standard HTTP requests (GET, POST, PUT, DELETE).
+// The service also manages session storage for tokens and user data, and processes API responses
+// including error handling and redirection on authentication failure.
+
 class ApiService
 {
-    protected $baseUrl;
-    protected $token;
+    protected $baseUrl; // The base URL for the API
+    protected $token;   // The current authorization token
 
+    /**
+     * Constructor: Initializes the API base URL and token from config/session.
+     */
     public function __construct()
     {
         $this->baseUrl = config('services.api.url');
@@ -18,7 +26,7 @@ class ApiService
     }
 
     /**
-     * Set the authorization token
+     * Set the authorization token for subsequent requests.
      *
      * @param string $token
      * @return $this
@@ -30,7 +38,7 @@ class ApiService
     }
 
     /**
-     * Make an HTTP GET request
+     * Make an HTTP GET request to the API.
      *
      * @param string $endpoint
      * @param array $params
@@ -45,7 +53,7 @@ class ApiService
     }
 
     /**
-     * Make an HTTP POST request
+     * Make an HTTP POST request to the API.
      *
      * @param string $endpoint
      * @param array $data
@@ -60,7 +68,7 @@ class ApiService
     }
 
     /**
-     * Make an HTTP PUT request
+     * Make an HTTP PUT request to the API.
      *
      * @param string $endpoint
      * @param array $data
@@ -75,7 +83,7 @@ class ApiService
     }
 
     /**
-     * Make an HTTP DELETE request
+     * Make an HTTP DELETE request to the API.
      *
      * @param string $endpoint
      * @return mixed
@@ -89,7 +97,10 @@ class ApiService
     }
 
     /**
-     * Handle the HTTP response
+     * Handle the HTTP response from the API.
+     *
+     * Processes JSON responses, handles authentication and validation errors,
+     * and returns a consistent structure for the application to use.
      *
      * @param \Illuminate\Http\Client\Response $response
      * @return mixed
@@ -122,7 +133,9 @@ class ApiService
     }
 
     /**
-     * Authenticate user and store token
+     * Authenticate user and store token in session.
+     *
+     * Sends login credentials to the API, stores the token and user data on success.
      *
      * @param string $email
      * @param string $password
@@ -150,7 +163,9 @@ class ApiService
     }
 
     /**
-     * Logout user and remove token
+     * Logout user and remove token from session.
+     *
+     * Calls the API to log out and clears session data.
      *
      * @return array
      */

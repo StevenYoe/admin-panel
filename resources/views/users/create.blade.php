@@ -1,3 +1,13 @@
+<!--
+    Create User Page
+    - Extends the main application layout
+    - Provides a form to add a new user to the system
+    - Includes fields for employee ID, username, email, password, phone, address, birthdate, join date, division, position, manager status, active status, profile image, and roles
+    - Uses Blade components for form inputs, selects, textareas, and buttons
+    - Handles file upload for profile image
+    - Form submits to the 'users.store' route
+    - Styled with Tailwind CSS utility classes
+-->
 @extends('layouts.app')
 
 @section('title', 'Tambah Pengguna - Pazar User Admin')
@@ -5,6 +15,7 @@
 @section('page-title', 'Tambah Pengguna')
 
 @section('content')
+    <!-- Back to User List Button -->
     <div class="mb-6">
         <x-button href="{{ route('users.index') }}" variant="outline">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -14,12 +25,15 @@
         </x-button>
     </div>
     
+    <!-- Card container for the form -->
     <x-card>
+        <!-- User creation form -->
         <form enctype="multipart/form-data" action="{{ route('users.store') }}" method="POST">
             @csrf
             
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div>
+                    <!-- Input for Employee ID -->
                     <x-form.input 
                         name="u_employee_id" 
                         label="Employee ID" 
@@ -31,6 +45,7 @@
                 </div>
                 
                 <div>
+                    <!-- Input for Username -->
                     <x-form.input 
                         name="u_name" 
                         label="Username" 
@@ -42,6 +57,7 @@
                 </div>
                 
                 <div>
+                    <!-- Input for Email -->
                     <x-form.input 
                         type="email" 
                         name="u_email" 
@@ -54,6 +70,7 @@
                 </div>
                 
                 <div>
+                    <!-- Input for Password -->
                     <x-form.input 
                         type="password" 
                         name="u_password" 
@@ -65,6 +82,7 @@
                 </div>
                 
                 <div>
+                    <!-- Input for Password Confirmation -->
                     <x-form.input 
                         type="password" 
                         name="u_password_confirmation" 
@@ -75,6 +93,7 @@
                 </div>
                 
                 <div>
+                    <!-- Input for Phone Number -->
                     <x-form.input 
                         type="tel" 
                         name="u_phone" 
@@ -86,6 +105,7 @@
                 </div>
                 
                 <div class="md:col-span-2">
+                    <!-- Input for Address -->
                     <x-form.textarea 
                         name="u_address" 
                         label="Alamat" 
@@ -96,6 +116,7 @@
                 </div>
                 
                 <div>
+                    <!-- Input for Birthdate -->
                     <x-form.input 
                         type="date" 
                         name="u_birthdate" 
@@ -106,6 +127,7 @@
                 </div>
                 
                 <div>
+                    <!-- Input for Join Date -->
                     <x-form.input 
                         type="date" 
                         name="u_join_date" 
@@ -116,6 +138,7 @@
                 </div>
                 
                 <div>
+                    <!-- Select for Division -->
                     <x-form.select 
                         name="u_division_id" 
                         label="Divisi" 
@@ -126,6 +149,7 @@
                 </div>
                 
                 <div>
+                    <!-- Select for Position -->
                     <x-form.select 
                         name="u_position_id" 
                         label="Jabatan" 
@@ -136,6 +160,7 @@
                 </div>
                 
                 <div>
+                    <!-- Radio buttons for Manager status -->
                     <label class="block text-sm font-medium mb-2">Is Manager?</label>
                     <div class="flex items-center space-x-4">
                         <label class="inline-flex items-center">
@@ -155,6 +180,7 @@
                 <input type="hidden" name="u_is_active" value="1">
 
                 <div class="mb-4">
+                    <!-- File input for Profile Image -->
                     <label for="u_profile_image" class="block text-sm font-medium mb-2">Profile Image</label>
                     <input type="file" name="u_profile_image" id="u_profile_image" accept="image/*"
                         class="block w-full text-sm text-gray-400 border border-gray-600 rounded-md 
@@ -174,6 +200,7 @@
                 </div>
                 
                 <div class="md:col-span-2">
+                    <!-- Checkbox list for assigning roles to the user -->
                     <h4 class="text-sm font-medium mb-2">Role</h4>
                     <div class="p-4 bg-gray-700 rounded-md border border-gray-600">
                         @foreach($roles as $id => $roleName)
@@ -190,6 +217,7 @@
                 </div>
             </div>
             
+            <!-- Action buttons: Cancel and Save -->
             <div class="flex justify-end mt-6 space-x-3">
                 <x-button type="button" href="{{ route('users.index') }}" variant="outline">
                     Batal
